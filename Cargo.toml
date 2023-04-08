@@ -1,0 +1,21 @@
+[package]
+name = "graph_process_manager_loggers"
+version = "0.1.0"
+authors = ["Erwan Mahe"]
+edition = "2021"
+
+license = "Apache-2.0"
+description = "Generic loggers for graph_process_manager_core"
+
+readme = "README.md"
+repository = "https://github.com/erwanM974/graph_process_manager_loggers"
+homepage = "https://github.com/erwanM974/graph_process_manager_loggers"
+
+keywords = ["graph", "tree", "process", "traversal", "heuristics"]
+
+
+[dependencies]
+maplit = "1.0.2"                                # for !hashset macro etc
+graph_process_manager_core = "0.1.2"
+graphviz_dot_builder = "0.1.2"
+
