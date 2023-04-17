@@ -14,19 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+use crate::tests::fibo_proc::step::FiboStepKind;
+use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
+
+#[derive(PartialEq, Eq, Hash, Clone)]
+pub struct FiboStepsTrace {
+    pub trace : Vec<FiboStepKind>
+}
+
+impl FiboStepsTrace {
+    pub fn new() -> FiboStepsTrace {
+        FiboStepsTrace{trace:vec![]}
+    }
+}
+
+impl std::string::ToString for FiboStepsTrace {
+    fn to_string(&self) -> String {
+        format!("{:?}", self.trace)
+    }
+}
+
+impl ObjectToBuildWhenTracingSteps for FiboStepsTrace {}
 
 
-#[macro_use]
-extern crate maplit;
-
-
-
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
-
-
-
-
-#[cfg(test)]
-mod tests;

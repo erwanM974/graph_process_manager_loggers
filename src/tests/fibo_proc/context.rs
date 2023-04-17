@@ -14,19 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+use graph_process_manager_core::manager::config::AbstractProcessParameterization;
 
 
-#[macro_use]
-extern crate maplit;
+pub struct FiboContext {}
 
+pub struct FiboParameterization {}
 
-
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
-
-
-
-
-#[cfg(test)]
-mod tests;
+impl AbstractProcessParameterization for FiboParameterization {
+    fn get_param_as_strings(&self) -> Vec<String> {
+        vec!["process = Fibonacci".to_string()]
+    }
+}

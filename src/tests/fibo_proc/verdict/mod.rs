@@ -15,14 +15,6 @@ limitations under the License.
 */
 
 
+pub mod global;
+pub mod local;
 
-#[derive(Clone, PartialEq, Debug, Eq, Hash)]
-pub enum GraphicProcessLoggerLayout {
-    Horizontal,
-    Vertical
-}
-
-pub enum GraphicLoggerNodeFormat {
-    AnchoredCluster,
-    SimpleNode
-}

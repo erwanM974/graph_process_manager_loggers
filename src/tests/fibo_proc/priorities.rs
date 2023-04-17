@@ -16,17 +16,23 @@ limitations under the License.
 
 
 
-#[macro_use]
-extern crate maplit;
 
 
+use graph_process_manager_core::delegate::priorities::AbstractPriorities;
 
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
+use crate::tests::fibo_proc::step::FiboStepKind;
 
+pub struct FiboPriorities {}
 
+impl ToString for FiboPriorities {
+    fn to_string(&self) -> String {
+        return "[]".to_string();
+    }
+}
 
-
-#[cfg(test)]
-mod tests;
+impl AbstractPriorities<FiboStepKind> for FiboPriorities {
+    fn get_priority_of_step(&self,
+                            _step: &FiboStepKind) -> i32 {
+        0
+    }
+}

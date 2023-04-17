@@ -15,18 +15,20 @@ limitations under the License.
 */
 
 
+pub enum FiboFilterEliminationKind {
+    MaxProcessDepth,
+    MaxNodeNumber
+}
 
-#[macro_use]
-extern crate maplit;
-
-
-
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
-
-
-
-
-#[cfg(test)]
-mod tests;
+impl std::string::ToString for FiboFilterEliminationKind {
+    fn to_string(&self) -> String {
+        match self {
+            FiboFilterEliminationKind::MaxProcessDepth => {
+                "MaxDepth".to_string()
+            },
+            FiboFilterEliminationKind::MaxNodeNumber => {
+                "MaxNum".to_string()
+            }
+        }
+    }
+}

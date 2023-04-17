@@ -20,32 +20,36 @@ use graphviz_dot_builder::item::cluster::GraphVizCluster;
 use graphviz_dot_builder::item::node::node::GraphVizNode;
 use graphviz_dot_builder::colors::GraphvizColor;
 
-use graph_process_manager_core::manager::config::AbstractConfiguration;
-use crate::graphviz_logger::format::GraphicLoggerNodeFormat;
+use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use crate::graphviz::format::GraphVizLoggerNodeFormat;
 
-pub trait GraphicProcessDrawer<Conf : AbstractConfiguration> {
+pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration> {
 
-    fn get_verdict_color(&self, local_verdict : &Conf::LocalVerdict) -> GraphvizColor;
+    fn get_temp_folder(&self) -> &str;
+
+    fn get_verdict_color(&self,
+                         local_verdict : &Conf::LocalVerdict) -> GraphvizColor;
 
     fn make_step_gvnode(&self,
-                        context: &Conf::ProcessContext,
+                        context: &Conf::Context,
+                        param: &Conf::Parameterization,
                         origin_state_id: u32,
                         target_state_id: u32,
-                      step: &Conf::StepKind) -> GraphVizNode;
+                        step: &Conf::StepKind) -> GraphVizNode;
 
     fn make_node_gvitem_as_gvcluster(&self,
-                                   context: &Conf::ProcessContext,
-                                   parameterization: &Conf::ProcessParameterization,
+                                     context: &Conf::Context,
+                                     param: &Conf::Parameterization,
                                    new_state_id: u32,
                                    new_node: &Conf::NodeKind) -> GraphVizCluster;
 
     fn make_node_gvitem_as_gvnode(&self,
-                                   context: &Conf::ProcessContext,
-                                   parameterization: &Conf::ProcessParameterization,
+                                  context: &Conf::Context,
+                                   param: &Conf::Parameterization,
                                    new_state_id: u32,
                                    new_node: &Conf::NodeKind) -> GraphVizNode;
 
-    fn get_node_format(&self) -> &GraphicLoggerNodeFormat;
+    fn get_node_format(&self) -> &GraphVizLoggerNodeFormat;
 
     fn get_anchor_id(&self, id : u32) -> String; // format!("a{:}", id)
 

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 
+use std::fs;
 use graphviz_dot_builder::colors::GraphvizColor;
 use graphviz_dot_builder::edge::edge::GraphVizEdge;
 use graphviz_dot_builder::edge::style::{GraphvizEdgeStyleItem, GvArrowHeadSide, GvArrowHeadStyle};
@@ -25,24 +26,40 @@ use graphviz_dot_builder::traits::DotPrintable;
 
 
 use graph_process_manager_core::manager::logger::AbstractProcessLogger;
-use graph_process_manager_core::manager::config::AbstractConfiguration;
+use graph_process_manager_core::manager::config::{AbstractProcessConfiguration, AbstractProcessParameterization};
 use graph_process_manager_core::queued_steps::queue::strategy::QueueSearchStrategy;
 use graph_process_manager_core::handler::filter::AbstractFilter;
 use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
 use graph_process_manager_core::manager::verdict::AbstractGlobalVerdict;
-use graph_process_manager_core::manager::config::AbstractProcessParameterization;
 
-use crate::graphviz_logger::format::GraphicLoggerNodeFormat;
-use crate::graphviz_logger::logger::GenericGraphVizLogger;
+use crate::graphviz::format::GraphVizLoggerNodeFormat;
+use crate::graphviz::logger::GenericGraphVizLogger;
 
 
-impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGraphVizLogger<Config> {
+impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for GenericGraphVizLogger<Conf> {
+
+    fn log_initialize(&mut self) {
+        // empties temp directory if exists
+        if let Err(e) = fs::remove_dir_all(self.drawer.get_temp_folder()) {
+            println!("error during logger initialization : {:?} ", e);
+        }
+        // creates temp directory if not exist
+        if let Err(e) = fs::create_dir_all(self.drawer.get_temp_folder()) {
+            println!("error during logger initialization : {:?} ", e);
+        }
+        // creates parent directory if not exist
+        if self.parent_folder != *"" {
+            if let Err(e) = fs::create_dir_all(&self.parent_folder) {
+                println!("error during logger initialization : {:?} ", e);
+            }
+        }
+    }
 
     fn log_parameterization(&mut self,
                             strategy: &QueueSearchStrategy,
-                            filters: &[Box<dyn AbstractFilter<Config::FilterCriterion, Config::FilterEliminationKind>>],
-                            priorities: &GenericProcessPriorities<Config::Priorities>,
-                            parameterization: &Config::ProcessParameterization) {
+                            filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
+                            priorities: &GenericProcessPriorities<Conf::Priorities>,
+                            parameterization: &Conf::Parameterization) {
 
         if self.display_legend {
             let mut options_str : Vec<String> = parameterization.get_param_as_strings();
@@ -68,10 +85,10 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
     }
 
     fn log_filtered(&mut self,
-                    context: &Config::ProcessContext,
-                    parent_state_id: u32,
-                    new_state_id: u32,
-                    elim_kind: &Config::FilterEliminationKind) {
+                    _context: &Conf::Context,
+                    parent_node_id: u32,
+                    new_node_id: u32,
+                    elim_kind: &Conf::FilterEliminationKind) {
         let elim_node : GraphVizNode;
         {
             let node_gv_options : GraphvizNodeStyle = vec![
@@ -83,7 +100,7 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
                 GraphvizNodeStyleItem::Shape(GvNodeShape::Pentagon),
                 GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])];
             // ***
-            elim_node = GraphVizNode::new(format!("e{:}", new_state_id),
+            elim_node = GraphVizNode::new(format!("e{:}", new_node_id),
                                           node_gv_options);
         }
         // ***
@@ -93,76 +110,91 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
                 GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
                 GraphvizEdgeStyleItem::Color( GraphvizColor::burlywood4 ) ];
             // ***
-            elim_edge = GraphVizEdge::new(format!("a{:}", parent_state_id),
-                                          Some(format!("n{}",parent_state_id)),
-                                          elim_node.id.clone(),
-                                          None,
-                                          tran_gv_options);
+            match self.drawer.get_node_format() {
+                GraphVizLoggerNodeFormat::AnchoredCluster => {
+                    elim_edge = GraphVizEdge::new(self.drawer.get_anchor_id(parent_node_id),
+                                                  Some(self.drawer.get_node_id(parent_node_id)),
+                                                  elim_node.id.clone(),
+                                                  None,
+                                                  tran_gv_options);
+                },
+                GraphVizLoggerNodeFormat::SimpleNode => {
+                    elim_edge = GraphVizEdge::new(self.drawer.get_node_id(parent_node_id),
+                                                  None,
+                                                  elim_node.id.clone(),
+                                                  None,
+                                                  tran_gv_options);
+                }
+            }
         }
         self.graph.add_node(elim_node);
         self.graph.add_edge(elim_edge);
     }
 
     fn log_new_node(&mut self,
-                    context: &Config::ProcessContext,
-                    parameterization: &Config::ProcessParameterization,
-                    new_state_id: u32,
-                    new_node: &Config::NodeKind) {
-        match self.process_drawer.get_node_format() {
-            GraphicLoggerNodeFormat::AnchoredCluster => {
-                let as_cluster = self.process_drawer.make_node_gvitem_as_gvcluster(context,
+                    context: &Conf::Context,
+                    parameterization: &Conf::Parameterization,
+                    new_node_id: u32,
+                    new_node: &Conf::NodeKind) {
+        match self.drawer.get_node_format() {
+            GraphVizLoggerNodeFormat::AnchoredCluster => {
+                let as_cluster = self.drawer.make_node_gvitem_as_gvcluster(context,
                                                                                    parameterization,
-                                                                                   new_state_id,
+                                                                                   new_node_id,
                                                                                    new_node);
                 self.graph.add_cluster(as_cluster);
             },
-            GraphicLoggerNodeFormat::SimpleNode => {
-                let as_node = self.process_drawer.make_node_gvitem_as_gvnode(context,
+            GraphVizLoggerNodeFormat::SimpleNode => {
+                let as_node = self.drawer.make_node_gvitem_as_gvnode(context,
                                                                                    parameterization,
-                                                                                   new_state_id,
+                                                                                   new_node_id,
                                                                                    new_node);
                 self.graph.add_node(as_node);
             }
         }
     }
 
-    fn log_new_transition(&mut self,
-                          context: &Config::ProcessContext,
-                          origin_state_id: u32,
-                          target_state_id: u32,
-                          step: &Config::StepKind) {
-        let step_gv_node = self.process_drawer.make_step_gvnode(context,
-                                                                origin_state_id,
-                                                                target_state_id,
-                                                                step);
+    fn log_new_step(&mut self,
+                    context: &Conf::Context,
+                    param : &Conf::Parameterization,
+                    origin_node_id: u32,
+                    target_node_id: u32,
+                    step: &Conf::StepKind,
+                    _target_node : &Conf::NodeKind,
+                    _target_depth : u32) {
+        let step_gv_node = self.drawer.make_step_gvnode(context,
+                                                        param,
+                                                        origin_node_id,
+                                                        target_node_id,
+                                                        step);
         // *** Transition To Step
-        match self.process_drawer.get_node_format() {
-            GraphicLoggerNodeFormat::AnchoredCluster => {
+        match self.drawer.get_node_format() {
+            GraphVizLoggerNodeFormat::AnchoredCluster => {
                 let tran_gv_options = vec![ GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ) ];
-                let tran_to_step = GraphVizEdge::new(self.process_drawer.get_anchor_id(origin_state_id),
-                                                    Some(self.process_drawer.get_node_id(origin_state_id)),
+                let tran_to_step = GraphVizEdge::new(self.drawer.get_anchor_id(origin_node_id),
+                                                    Some(self.drawer.get_node_id(origin_node_id)),
                                                      step_gv_node.id.clone(),
                                                     None,
                                                      tran_gv_options.clone());
                 let tran_to_new = GraphVizEdge::new(step_gv_node.id.clone(),
                                                     None,
-                                                    self.process_drawer.get_anchor_id(target_state_id),
-                                                    Some(self.process_drawer.get_node_id(target_state_id)),
+                                                    self.drawer.get_anchor_id(target_node_id),
+                                                    Some(self.drawer.get_node_id(target_node_id)),
                                                     tran_gv_options);
                 self.graph.add_node(step_gv_node);
                 self.graph.add_edge(tran_to_step);
                 self.graph.add_edge(tran_to_new);
             },
-            GraphicLoggerNodeFormat::SimpleNode => {
+            GraphVizLoggerNodeFormat::SimpleNode => {
                 let tran_gv_options = vec![ GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ) ];
-                let tran_to_step = GraphVizEdge::new(self.process_drawer.get_node_id(origin_state_id),
+                let tran_to_step = GraphVizEdge::new(self.drawer.get_node_id(origin_node_id),
                                                      None,
                                                      step_gv_node.id.clone(),
                                                      None,
                                                      tran_gv_options.clone());
                 let tran_to_new = GraphVizEdge::new(step_gv_node.id.clone(),
                                                     None,
-                                                    self.process_drawer.get_node_id(target_state_id),
+                                                    self.drawer.get_node_id(target_node_id),
                                                     None,
                                                     tran_gv_options);
                 self.graph.add_node(step_gv_node);
@@ -173,10 +205,11 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
     }
 
     fn log_verdict(&mut self,
-                   context: &Config::ProcessContext,
-                   parent_state_id: u32,
-                   verdict: &Config::LocalVerdict) {
-        let verdict_color = self.process_drawer.get_verdict_color(verdict);
+                   _context: &Conf::Context,
+                   _param : &Conf::Parameterization,
+                   parent_node_id: u32,
+                   verdict: &Conf::LocalVerdict) {
+        let verdict_color = self.drawer.get_verdict_color(verdict);
         // ***
         let verd_node : GraphVizNode;
         {
@@ -189,7 +222,7 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
                 GraphvizNodeStyleItem::Shape(GvNodeShape::Diamond),
                 GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])];
             // ***
-            verd_node = GraphVizNode::new(format!("v{:}", parent_state_id),node_gv_options);
+            verd_node = GraphVizNode::new(format!("v{:}", parent_node_id),node_gv_options);
         }
         // ***
         let verd_edge : GraphVizEdge;
@@ -197,16 +230,16 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
             let tran_gv_options = vec![GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
                                        GraphvizEdgeStyleItem::Color( verdict_color )];
             // ***
-            match self.process_drawer.get_node_format() {
-                GraphicLoggerNodeFormat::AnchoredCluster => {
-                    verd_edge = GraphVizEdge::new(self.process_drawer.get_anchor_id(parent_state_id),
-                                                  Some(self.process_drawer.get_node_id(parent_state_id)),
+            match self.drawer.get_node_format() {
+                GraphVizLoggerNodeFormat::AnchoredCluster => {
+                    verd_edge = GraphVizEdge::new(self.drawer.get_anchor_id(parent_node_id),
+                                                  Some(self.drawer.get_node_id(parent_node_id)),
                                                   verd_node.id.clone(),
                                                   None,
                                                   tran_gv_options);
                 },
-                GraphicLoggerNodeFormat::SimpleNode => {
-                    verd_edge = GraphVizEdge::new(self.process_drawer.get_node_id(parent_state_id),
+                GraphVizLoggerNodeFormat::SimpleNode => {
+                    verd_edge = GraphVizEdge::new(self.drawer.get_node_id(parent_node_id),
                                                   None,
                                                   verd_node.id.clone(),
                                                   None,
@@ -219,8 +252,8 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
     }
 
     fn log_terminate(&mut self,
-                     global_verdict: &Config::GlobalVerdict) {
-        if Config::GlobalVerdict::is_verdict_pertinent_for_process() && self.display_legend {
+                     global_verdict: &Conf::GlobalVerdict) {
+        if Conf::GlobalVerdict::is_verdict_pertinent_for_process() && self.display_legend {
             let verd_str = format!("verdict={}", global_verdict.to_string());
             let legend_node_gv_options : GraphvizNodeStyle = vec![
                 GraphvizNodeStyleItem::Label( verd_str ),
@@ -232,18 +265,22 @@ impl<Config : AbstractConfiguration> AbstractProcessLogger<Config> for GenericGr
                                                legend_node_gv_options);
             self.graph.add_node(verd_node);
         }
-        self.graph.print_dot(&[self.parent_folder.clone()],&self.output_file_name,&self.output_format);
+        if let Err(e) = self.graph.print_dot(&[self.parent_folder.clone()],
+                                             &self.output_file_name,
+                                             &self.output_format) {
+            println!("error during logger termination : {:?} ", e);
+        }
     }
 
     fn log_notify_terminal_node_reached(&mut self,
-                                        context: &Config::ProcessContext,
-                                        node_id: u32) {
+                                        _context: &Conf::Context,
+                                        _node_id: u32) {
         // nothing
     }
 
     fn log_notify_last_child_of_node_processed(&mut self,
-                                               context: &Config::ProcessContext,
-                                               parent_node_id: u32) {
+                                               _context: &Conf::Context,
+                                               _parent_node_id: u32) {
         // nothing
     }
 }

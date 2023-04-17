@@ -16,17 +16,27 @@ limitations under the License.
 
 
 
-#[macro_use]
-extern crate maplit;
+
+use std::hash::Hash;
+
+use graph_process_manager_core::manager::config::AbstractNodeKind;
 
 
+#[derive(Clone, PartialEq, Debug, Eq, Hash)]
+pub struct FiboNodeKind {
+    pub current : u32,
+    pub next : u32
+}
 
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
+impl FiboNodeKind {
+    pub fn new(current: u32, next: u32) -> Self {
+        Self { current, next }
+    }
+}
 
+impl AbstractNodeKind for FiboNodeKind {
+    fn is_included_for_memoization(&self, memoized_node: &Self) -> bool {
+        memoized_node.current == self.current && memoized_node.next == self.next
+    }
+}
 
-
-
-#[cfg(test)]
-mod tests;

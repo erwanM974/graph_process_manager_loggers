@@ -16,17 +16,13 @@ limitations under the License.
 
 
 
-#[macro_use]
-extern crate maplit;
+#[derive(Clone, PartialEq, Debug, Eq, Hash)]
+pub enum GraphVizProcessLoggerLayout {
+    Horizontal,
+    Vertical
+}
 
-
-
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
-
-
-
-
-#[cfg(test)]
-mod tests;
+pub enum GraphVizLoggerNodeFormat {
+    AnchoredCluster,
+    SimpleNode
+}

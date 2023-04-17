@@ -16,17 +16,14 @@ limitations under the License.
 
 
 
-#[macro_use]
-extern crate maplit;
 
+pub struct FiboLocalVerdict{}
 
+impl std::string::ToString for FiboLocalVerdict {
 
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
+    fn to_string(&self) -> String {
+        "".to_string()
+    }
 
+}
 
-
-
-#[cfg(test)]
-mod tests;

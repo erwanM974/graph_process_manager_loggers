@@ -16,17 +16,8 @@ limitations under the License.
 
 
 
-#[macro_use]
-extern crate maplit;
 
-
-
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
-
-
-
-
-#[cfg(test)]
-mod tests;
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub enum FiboStepKind {
+    Next
+}

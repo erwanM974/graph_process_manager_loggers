@@ -16,17 +16,20 @@ limitations under the License.
 
 
 
-#[macro_use]
-extern crate maplit;
+use std::path::Path;
+use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
 
 
+pub trait NodesPrintProcessPrinter<Conf : AbstractProcessConfiguration> {
 
-pub mod graphviz;
-pub mod stepstrace;
-pub mod nodesprint;
+    fn should_print_node(&self,
+                      context: &Conf::Context,
+                      param: &Conf::Parameterization,
+                      node: &Conf::NodeKind) -> bool;
 
-
-
-
-#[cfg(test)]
-mod tests;
+    fn print_node(&self,
+                  context: &Conf::Context,
+                  param: &Conf::Parameterization,
+                  node: &Conf::NodeKind,
+                  path : &Path);
+}
