@@ -22,7 +22,7 @@ use graphviz_dot_builder::item::node::node::GraphVizNode;
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape};
 use crate::graphviz::drawer::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
-use crate::tests::fibo_proc::conf::FiboConfig;
+use crate::tests::fibo_proc::conf::{FiboConfig, FiboStaticProof};
 use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
 use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::step::FiboStepKind;
@@ -49,6 +49,15 @@ impl GraphVizProcessDrawer<FiboConfig> for FiboProcessDrawer {
     fn get_verdict_color(&self,
                          _local_verdict: &FiboLocalVerdict) -> GraphvizColor {
         GraphvizColor::black
+    }
+
+    fn make_static_analysis_as_gvcluster(&self,
+                                         _context: &FiboContext,
+                                         _param : &FiboParameterization,
+                                         _parent_state_id: u32,
+                                         _verdict: &FiboLocalVerdict,
+                                         _data_proof: &FiboStaticProof) -> GraphVizCluster {
+        panic!("should never be called")
     }
 
     fn make_step_gvnode(&self,
@@ -101,5 +110,13 @@ impl GraphVizProcessDrawer<FiboConfig> for FiboProcessDrawer {
     fn get_node_id(&self,
                    id: u32) -> String {
         format!("n{:}", id)
+    }
+
+    fn get_verdict_id(&self, id: u32) -> String {
+        format!("v{:}", id)
+    }
+
+    fn get_static_analysis_ids(&self, id: u32) -> (String, String) {
+        (format!("stat{:}", id),format!("stat_anchor{:}", id))
     }
 }

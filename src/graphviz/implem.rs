@@ -57,8 +57,10 @@ impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for Generi
 
     fn log_parameterization(&mut self,
                             strategy: &QueueSearchStrategy,
-                            filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
                             priorities: &GenericProcessPriorities<Conf::Priorities>,
+                            filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
+                            goal : &Option<Conf::GlobalVerdict>,
+                            use_memoization : bool,
                             parameterization: &Conf::Parameterization) {
 
         if self.display_legend {
@@ -71,6 +73,15 @@ impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for Generi
                 let filters_str = format!("filters=[{}]", filters_strs.join(","));
                 options_str.push( filters_str );
             }
+            match goal {
+                None => {
+                    options_str.push( "goal=None".to_string() );
+                },
+                Some(ref target_verdict) => {
+                    options_str.push( format!("goal={}", target_verdict.to_string()) );
+                }
+            }
+            options_str.push( format!("use_memoization={}", use_memoization) );
             // ***
             let legend_node_gv_options : GraphvizNodeStyle = vec![
                 GraphvizNodeStyleItem::Label( options_str.join("\n") ),
@@ -204,7 +215,67 @@ impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for Generi
         }
     }
 
-    fn log_verdict(&mut self,
+    fn log_verdict_on_static_analysis(&mut self,
+                                      context: &Conf::Context,
+                                      param : &Conf::Parameterization,
+                                      parent_node_id: u32,
+                                      verdict: &Conf::LocalVerdict,
+                                      proof_data : &Conf::StaticLocalVerdictAnalysisProof) {
+        let analysis_cluster = self.drawer.make_static_analysis_as_gvcluster(context,
+                                                                             param,
+                                                                             parent_node_id,
+                                                                             verdict,
+                                                                             proof_data);
+        let verdict_color = self.drawer.get_verdict_color(verdict);
+        // ***
+        let verd_node : GraphVizNode;
+        {
+            let node_gv_options : GraphvizNodeStyle = vec![
+                GraphvizNodeStyleItem::Label( verdict.to_string() ),
+                GraphvizNodeStyleItem::Color( verdict_color.clone() ),
+                GraphvizNodeStyleItem::FontColor( GraphvizColor::beige ),
+                GraphvizNodeStyleItem::FontSize( 16 ),
+                GraphvizNodeStyleItem::FontName( "times-bold".to_string() ),
+                GraphvizNodeStyleItem::Shape(GvNodeShape::Diamond),
+                GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])];
+            // ***
+            verd_node = GraphVizNode::new(self.drawer.get_verdict_id(parent_node_id),node_gv_options);
+        }
+        // ***
+        let tran_gv_options = vec![GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
+                                   GraphvizEdgeStyleItem::Color( verdict_color )];
+        // ***
+        let (static_analysis_node_id,static_analysis_anchor_id) = self.drawer.get_static_analysis_ids(parent_node_id);
+        let to_ana_edge : GraphVizEdge = match self.drawer.get_node_format() {
+            GraphVizLoggerNodeFormat::AnchoredCluster => {
+                GraphVizEdge::new(self.drawer.get_anchor_id(parent_node_id),
+                                  Some(self.drawer.get_node_id(parent_node_id)),
+                                  static_analysis_anchor_id.clone(),
+                                  Some(static_analysis_node_id.clone()),
+                                  tran_gv_options.clone())
+            },
+            GraphVizLoggerNodeFormat::SimpleNode => {
+                GraphVizEdge::new(self.drawer.get_node_id(parent_node_id),
+                                  None,
+                                  static_analysis_anchor_id.clone(),
+                                  Some(static_analysis_node_id.clone()),
+                                  tran_gv_options.clone())
+            }
+        };
+        let to_verd_edge = GraphVizEdge::new(
+            static_analysis_anchor_id,
+            Some(static_analysis_node_id),
+            verd_node.id.clone(),
+            None,
+            tran_gv_options);
+        // ***
+        self.graph.add_cluster(analysis_cluster);
+        self.graph.add_node(verd_node);
+        self.graph.add_edge(to_ana_edge);
+        self.graph.add_edge(to_verd_edge);
+    }
+
+    fn log_verdict_on_no_child(&mut self,
                    _context: &Conf::Context,
                    _param : &Conf::Parameterization,
                    parent_node_id: u32,

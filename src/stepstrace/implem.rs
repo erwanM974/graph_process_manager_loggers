@@ -46,8 +46,10 @@ impl<Conf : AbstractProcessConfiguration, ObjectToBuild : ObjectToBuildWhenTraci
 
     fn log_parameterization(&mut self,
                             _strategy: &QueueSearchStrategy,
-                            _filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
                             _priorities: &GenericProcessPriorities<Conf::Priorities>,
+                            _filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
+                            _goal : &Option<Conf::GlobalVerdict>,
+                            _use_memoization : bool,
                             _parameterization: &Conf::Parameterization) {
         // nothing
     }
@@ -113,11 +115,20 @@ impl<Conf : AbstractProcessConfiguration, ObjectToBuild : ObjectToBuildWhenTraci
         }
     }
 
-    fn log_verdict(&mut self,
-                   _context: &Conf::Context,
-                   _param: &Conf::Parameterization,
-                   _parent_state_id: u32,
-                   _verdict: &Conf::LocalVerdict) {
+    fn log_verdict_on_no_child(&mut self,
+                               _context: &Conf::Context,
+                               _param: &Conf::Parameterization,
+                               _parent_state_id: u32,
+                               _verdict: &Conf::LocalVerdict) {
+        // nothing
+    }
+
+    fn log_verdict_on_static_analysis(&mut self,
+                                      _context: &Conf::Context,
+                                      _param: &Conf::Parameterization,
+                                      _parent_state_id: u32,
+                                      _verdict: &Conf::LocalVerdict,
+                                      _proof : &Conf::StaticLocalVerdictAnalysisProof) {
         // nothing
     }
 

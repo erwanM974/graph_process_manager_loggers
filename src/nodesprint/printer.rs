@@ -32,4 +32,5 @@ pub trait NodesPrintProcessPrinter<Conf : AbstractProcessConfiguration> {
                   param: &Conf::Parameterization,
                   node: &Conf::NodeKind,
                   path : &Path);
+
 }

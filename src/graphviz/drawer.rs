@@ -30,6 +30,13 @@ pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration> {
     fn get_verdict_color(&self,
                          local_verdict : &Conf::LocalVerdict) -> GraphvizColor;
 
+    fn make_static_analysis_as_gvcluster(&self,
+                                         context: &Conf::Context,
+                                         param: &Conf::Parameterization,
+                                         parent_state_id: u32,
+                                         verdict: &Conf::LocalVerdict,
+                                         data_proof : &Conf::StaticLocalVerdictAnalysisProof) -> GraphVizCluster;
+
     fn make_step_gvnode(&self,
                         context: &Conf::Context,
                         param: &Conf::Parameterization,
@@ -54,5 +61,9 @@ pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration> {
     fn get_anchor_id(&self, id : u32) -> String; // format!("a{:}", id)
 
     fn get_node_id(&self, id : u32) -> String; // format!("n{:}", id)
+
+    fn get_verdict_id(&self, id : u32) -> String; // format!("v{:}", id)
+
+    fn get_static_analysis_ids(&self, id : u32) -> (String,String); // (format!("stat{:}", id),format!("stat_anchor{:}", id))
 
 }

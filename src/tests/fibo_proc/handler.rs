@@ -19,7 +19,7 @@ limitations under the License.
 use graph_process_manager_core::delegate::node::GenericNode;
 use graph_process_manager_core::handler::handler::AbstractProcessHandler;
 use graph_process_manager_core::queued_steps::step::GenericStep;
-use crate::tests::fibo_proc::conf::FiboConfig;
+use crate::tests::fibo_proc::conf::{FiboConfig, FiboStaticProof};
 use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
 use crate::tests::fibo_proc::filter::filter::FiboFilterCriterion;
 use crate::tests::fibo_proc::node::FiboNodeKind;
@@ -72,8 +72,8 @@ impl AbstractProcessHandler<FiboConfig> for FiboProcessHandler {
 
     fn get_local_verdict_from_static_analysis(_context: &FiboContext,
                                               _param: &FiboParameterization,
-                                              _node_kind: &FiboNodeKind) -> FiboLocalVerdict {
-        FiboLocalVerdict{}
+                                              _node_kind: &mut FiboNodeKind) -> Option<(FiboLocalVerdict, FiboStaticProof)> {
+        None
     }
 
     fn pursue_process_after_static_verdict(_context: &FiboContext,

@@ -30,6 +30,8 @@ use crate::tests::fibo_proc::verdict::local::FiboLocalVerdict;
 
 pub struct FiboConfig {}
 
+pub struct FiboStaticProof {}
+
 impl AbstractProcessConfiguration for FiboConfig {
     type Context = FiboContext;
     type Parameterization = FiboParameterization;
@@ -39,6 +41,7 @@ impl AbstractProcessConfiguration for FiboConfig {
     type FilterCriterion = FiboFilterCriterion;
     type FilterEliminationKind = FiboFilterEliminationKind;
     type LocalVerdict = FiboLocalVerdict;
+    type StaticLocalVerdictAnalysisProof = FiboStaticProof;
     type GlobalVerdict = FiboGlobalVerdict;
     type ProcessHandler = FiboProcessHandler;
 }
