@@ -20,11 +20,10 @@ limitations under the License.
 extern crate maplit;
 
 
-
 pub mod graphviz;
 pub mod stepstrace;
 pub mod nodesprint;
-
+pub mod nfait;
 
 
 

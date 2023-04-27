@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod glog;
-pub mod nlog;
-pub mod slog;
-pub mod nfait;
+
+pub mod logger;
+mod implem;
+pub mod printer;
+
+
