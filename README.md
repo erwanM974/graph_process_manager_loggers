@@ -15,7 +15,7 @@ Applying a simple GraphViz logger to this example process gives the following re
 
 The following Automata can be build from this exploration :
 
-<img src="./README_images/fib_NFAIT.svg" alt="NFAIT of Fibonacci process">
+<img src="./README_images/fib_nfait.svg" alt="NFAIT of Fibonacci process">
 
 
 A nodesPrint logger is used here to print the numbers in the Fibonacci sequence in text files
