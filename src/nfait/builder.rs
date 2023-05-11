@@ -22,9 +22,9 @@ use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
 
 
 
-pub trait NFAITProcessPrinter<Conf : AbstractProcessConfiguration, Letter : AutLetter> {
+pub trait NFAITProcessBuilder<Conf : AbstractProcessConfiguration, Letter : AutLetter> {
 
-    fn step_into_letter(&self,
+    fn step_into_letter(&mut self,
                           context: &Conf::Context,
                           param: &Conf::Parameterization,
                           step : &Conf::StepKind) -> Option<Letter>;

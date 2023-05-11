@@ -32,7 +32,6 @@ use crate::tests::fibo_proc::conf::FiboConfig;
 use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
 use crate::tests::fibo_proc::filter::filter::FiboFilter;
 use crate::tests::fibo_proc::loggers::glog::drawer::FiboProcessDrawer;
-use crate::tests::fibo_proc::loggers::nfait::printer::FiboNFAITPrinter;
 use crate::tests::fibo_proc::loggers::nlog::printer::FiboProcessNodePrinter;
 use crate::tests::fibo_proc::loggers::slog::object::FiboStepsTrace;
 use crate::tests::fibo_proc::loggers::slog::printer::FiboProcessStepPrinter;
@@ -68,8 +67,8 @@ fn process_fibo() {
                                                                                                          "txt".to_string(),
                                                                                                          fibo_buf.clone().into_os_string().into_string().unwrap());
 
-    let nfait_printer = FiboNFAITPrinter{};
-    let nfait_logger : GenericNFAITLogger<FiboConfig,char,CharAsLetterPrinter> = GenericNFAITLogger::new(Box::new(nfait_printer),
+    let nfait_printer = CharAsLetterPrinter{};
+    let nfait_logger : GenericNFAITLogger<FiboConfig,char,CharAsLetterPrinter> = GenericNFAITLogger::new(nfait_printer,
                                                                                      "fib_nfait".to_string(),
                                                                                      Some(GraphVizOutputFormat::svg),
                                                                                      fibo_buf.into_os_string().into_string().unwrap());

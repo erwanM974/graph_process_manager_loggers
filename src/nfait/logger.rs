@@ -24,19 +24,21 @@ use autour_core::traits::repr::AbstractLanguagePrinter;
 use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
-use crate::nfait::printer::NFAITProcessPrinter;
+use crate::nfait::builder::NFAITProcessBuilder;
 
 
-pub struct GenericNFAITLogger<Conf,Letter,LPrinter>
+pub trait NFAITBuilderPrinter<Conf : AbstractProcessConfiguration,Letter : AutLetter> :
+    NFAITProcessBuilder<Conf, Letter> + AbstractLanguagePrinter<Letter> {}
+
+pub struct GenericNFAITLogger<Conf,Letter,BP>
     where
         Conf : AbstractProcessConfiguration,
         Letter : AutLetter,
-        LPrinter : AbstractLanguagePrinter<Letter>
+        BP : NFAITBuilderPrinter<Conf, Letter>
         {
     // ***
-    phantom : std::marker::PhantomData<LPrinter>,
-    // ***
-    pub(crate) printer : Box<dyn NFAITProcessPrinter<Conf, Letter>>,
+    phantom : std::marker::PhantomData<Conf>,
+    pub builder_printer : BP,
     // ***
     pub(crate) name : String,   // name of the generated files (.aaf et soit .svg soit .png)
     pub(crate) draw : Option<GraphVizOutputFormat>, // whether or not to draw the NFAIT at the end and if so in which format
@@ -54,18 +56,18 @@ pub struct GenericNFAITLogger<Conf,Letter,LPrinter>
     pub(crate) epsilon_trans : HashMap<usize,HashSet<usize>>
 }
 
-impl<Conf, Letter, LPrinter> GenericNFAITLogger<Conf, Letter, LPrinter> where
+impl<Conf, Letter,BP> GenericNFAITLogger<Conf, Letter,BP> where
     Conf: AbstractProcessConfiguration,
     Letter: AutLetter,
-    LPrinter: AbstractLanguagePrinter<Letter> {
+    BP : NFAITBuilderPrinter<Conf, Letter> {
 
-    pub fn new(printer: Box<dyn NFAITProcessPrinter<Conf, Letter>>,
+    pub fn new(builder_printer: BP,
                name: String,
                draw: Option<GraphVizOutputFormat>,
                parent_folder: String) -> Self {
         Self {
             phantom : std::marker::PhantomData,
-            printer,
+            builder_printer,
             name,
             draw,
             parent_folder,

@@ -14,11 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
-
-use autour_core::nfait::nfait::AutNFAIT;
 use autour_core::traits::letter::AutLetter;
-use autour_core::traits::repr::{AbstractLanguagePrinter, AutGraphvizDrawable};
+use autour_core::traits::repr::AutGraphvizDrawable;
 
 use graph_process_manager_core::manager::logger::AbstractProcessLogger;
 use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
@@ -27,16 +24,16 @@ use graph_process_manager_core::handler::filter::AbstractFilter;
 use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
 use graphviz_dot_builder::traits::DotPrintable;
 
-use crate::nfait::logger::GenericNFAITLogger;
+use crate::nfait::logger::{GenericNFAITLogger, NFAITBuilderPrinter};
 
 
-impl<Conf, Letter, LPrinter>
-        AbstractProcessLogger<Conf> for GenericNFAITLogger<Conf,Letter,LPrinter>
+impl<Conf, Letter,BP>
+        AbstractProcessLogger<Conf> for GenericNFAITLogger<Conf,Letter,BP>
 
     where
         Conf : AbstractProcessConfiguration,
         Letter : AutLetter,
-        LPrinter : AbstractLanguagePrinter<Letter>
+        BP : NFAITBuilderPrinter<Conf, Letter>
             {
 
     fn log_initialize(&mut self) {
@@ -48,7 +45,7 @@ impl<Conf, Letter, LPrinter>
                             _priorities: &GenericProcessPriorities<Conf::Priorities>,
                             _filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
                             _goal : &Option<Conf::GlobalVerdict>,
-                            _use_memoization : bool,
+                            _memoize : bool,
                             _parameterization: &Conf::Parameterization) {
         // nothing
     }
@@ -80,7 +77,7 @@ impl<Conf, Letter, LPrinter>
                     _target_depth : u32) {
         let orig_stid_usize = (origin_state_id -1) as usize;
         let targ_stid_usize = (target_state_id -1) as usize;
-        match self.printer.step_into_letter(context,param,step) {
+        match self.builder_printer.step_into_letter(context,param,step) {
             None => {
                 match self.epsilon_trans.get_mut(&orig_stid_usize) {
                     None => {
@@ -137,8 +134,9 @@ impl<Conf, Letter, LPrinter>
         match &self.draw {
             None => {},
             Some(format) => {
-                let graph = <AutNFAIT<Letter> as AutGraphvizDrawable<Letter, LPrinter>>::to_dot(&got_nfait,
-                                                                                               true,&hashset! {});
+                let graph = got_nfait.to_dot(true,
+                                             &hashset!{},
+                                             &self.builder_printer);
                 graph.print_dot(&[self.parent_folder.clone()],
                                 &self.name,
                                 format);

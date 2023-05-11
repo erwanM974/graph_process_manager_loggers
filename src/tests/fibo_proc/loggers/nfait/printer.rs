@@ -16,18 +16,20 @@ limitations under the License.
 
 
 
-use crate::nfait::printer::NFAITProcessPrinter;
+use autour_core::printers::p_chars::CharAsLetterPrinter;
+use crate::nfait::builder::NFAITProcessBuilder;
+use crate::nfait::logger::NFAITBuilderPrinter;
 
 use crate::tests::fibo_proc::conf::FiboConfig;
 use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
 use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::step::FiboStepKind;
 
-pub struct FiboNFAITPrinter {}
 
-impl NFAITProcessPrinter<FiboConfig,char> for FiboNFAITPrinter {
 
-    fn step_into_letter(&self,
+impl NFAITProcessBuilder<FiboConfig,char> for CharAsLetterPrinter {
+
+    fn step_into_letter(&mut self,
                         _context: &FiboContext,
                         _param: &FiboParameterization,
                         _step: &FiboStepKind) -> Option<char> {
@@ -41,3 +43,5 @@ impl NFAITProcessPrinter<FiboConfig,char> for FiboNFAITPrinter {
         false
     }
 }
+
+impl NFAITBuilderPrinter<FiboConfig, char> for CharAsLetterPrinter {}

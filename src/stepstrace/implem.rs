@@ -49,7 +49,7 @@ impl<Conf : AbstractProcessConfiguration, ObjectToBuild : ObjectToBuildWhenTraci
                             _priorities: &GenericProcessPriorities<Conf::Priorities>,
                             _filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
                             _goal : &Option<Conf::GlobalVerdict>,
-                            _use_memoization : bool,
+                            _memoize : bool,
                             _parameterization: &Conf::Parameterization) {
         // nothing
     }

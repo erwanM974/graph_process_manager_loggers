@@ -60,7 +60,7 @@ impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for Generi
                             priorities: &GenericProcessPriorities<Conf::Priorities>,
                             filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
                             goal : &Option<Conf::GlobalVerdict>,
-                            use_memoization : bool,
+                            memoize : bool,
                             parameterization: &Conf::Parameterization) {
 
         if self.display_legend {
@@ -81,7 +81,7 @@ impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for Generi
                     options_str.push( format!("goal={}", target_verdict.to_string()) );
                 }
             }
-            options_str.push( format!("use_memoization={}", use_memoization) );
+            options_str.push( format!("memoize={}", memoize) );
             // ***
             let legend_node_gv_options : GraphvizNodeStyle = vec![
                 GraphvizNodeStyleItem::Label( options_str.join("\n") ),
