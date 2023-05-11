@@ -15,8 +15,7 @@ limitations under the License.
 */
 
 
-use std::collections::{HashMap, HashSet};
-use itertools::Itertools;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use autour_core::nfait::nfait::AutNFAIT;
 use autour_core::traits::letter::AutLetter;
@@ -50,7 +49,9 @@ pub struct GenericNFAITLogger<Conf,Letter,BP>
 
     // depending on the process (filtered nodes, memoization etc,
     // the set of nodes may not be a contiguous 0..n
-    pub(crate) nodes_ids : HashSet<usize>,
+    pub(crate) explo_node_id_to_nfa_state_id_map : BTreeMap<u32,usize>,
+    pub(crate) next_nfa_state_id : usize,
+
     pub(crate) alphabet : HashSet<Letter>,
     // below : attributes of the NFAIT being build
     // there is a single initial : the process start state
@@ -74,7 +75,8 @@ impl<Conf, Letter,BP> GenericNFAITLogger<Conf, Letter,BP> where
             name,
             draw,
             parent_folder,
-            nodes_ids: hashset!{},
+            explo_node_id_to_nfa_state_id_map: btreemap!{},
+            next_nfa_state_id:0,
             alphabet: hashset!{},
             finals: hashset!{},
             transitions: hashmap!{},
@@ -82,11 +84,9 @@ impl<Conf, Letter,BP> GenericNFAITLogger<Conf, Letter,BP> where
     }
 
     pub fn get_nfait(&self) -> AutNFAIT<Letter> {
-        let nodes_ids_sorted : Vec<usize> = self.nodes_ids.iter().cloned().sorted().collect();
-        let node_of_max_id = nodes_ids_sorted.last().unwrap();
         let mut transitions : Vec<HashMap<Letter, HashSet<usize>>> = vec![];
         let mut epsilon_trans : Vec<HashSet<usize>> = vec![];
-        for i in 0..=*node_of_max_id {
+        for i in 0..self.next_nfa_state_id {
             if let Some(outgoing) = self.transitions.get(&i) {
                 transitions.push(outgoing.clone());
             } else {

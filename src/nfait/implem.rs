@@ -67,52 +67,53 @@ impl<Conf, Letter,BP>
     fn log_new_node(&mut self,
                     context: &Conf::Context,
                     param: &Conf::Parameterization,
-                    new_state_id: u32,
+                    new_node_id: u32,
                     new_node: &Conf::NodeKind) {
-        // minus 1 because node id in graph_process_manager_core starts at 1
-        let node_id = (new_state_id - 1) as usize;
-        self.nodes_ids.insert(node_id);
+        let nfa_state_id = self.next_nfa_state_id;
+        self.next_nfa_state_id += 1;
+        self.explo_node_id_to_nfa_state_id_map.insert(new_node_id,nfa_state_id);
+        // ***
         if self.builder_printer.is_node_final(context,param,new_node) {
-            self.finals.insert(node_id);
+            self.finals.insert(nfa_state_id);
         }
     }
 
     fn log_new_step(&mut self,
                     context: &Conf::Context,
                     param: &Conf::Parameterization,
-                    origin_state_id: u32,
-                    target_state_id: u32,
+                    origin_node_id: u32,
+                    target_node_id: u32,
                     step: &Conf::StepKind,
                     _target_node : &Conf::NodeKind,
                     _target_depth : u32) {
-        let orig_stid_usize = (origin_state_id -1) as usize;
-        let targ_stid_usize = (target_state_id -1) as usize;
+        let nfa_orig_state_id = *self.explo_node_id_to_nfa_state_id_map.get(&origin_node_id).unwrap();
+        let nfa_targ_state_id = *self.explo_node_id_to_nfa_state_id_map.get(&target_node_id).unwrap();
         match self.builder_printer.step_into_letter(context,param,step) {
             None => {
-                match self.epsilon_trans.get_mut(&orig_stid_usize) {
+                match self.epsilon_trans.get_mut(&nfa_orig_state_id) {
                     None => {
-                        self.epsilon_trans.insert(orig_stid_usize,
-                                                  hashset! {targ_stid_usize});
+                        self.epsilon_trans.insert(nfa_orig_state_id,
+                                                  hashset! {nfa_targ_state_id});
                     },
                     Some(ep_targets) => {
-                        ep_targets.insert(targ_stid_usize);
+                        ep_targets.insert(nfa_targ_state_id);
                     }
                 }
             },
             Some(letter) => {
                 self.alphabet.insert(letter);
-                match self.transitions.get_mut(&orig_stid_usize) {
+                match self.transitions.get_mut(&nfa_orig_state_id) {
                     None => {
-                        self.transitions.insert(orig_stid_usize,
-                                                hashmap! {letter => hashset!{targ_stid_usize}});
+                        self.transitions.insert(nfa_orig_state_id,
+                                                hashmap! {letter => hashset!{nfa_targ_state_id}});
                     },
                     Some(outgoing) => {
                         match outgoing.get_mut(&letter) {
                             None => {
-                                outgoing.insert(letter,hashset!{targ_stid_usize});
+                                outgoing.insert(letter,hashset!{nfa_targ_state_id});
                             },
                             Some(letter_targets) => {
-                                letter_targets.insert(targ_stid_usize);
+                                letter_targets.insert(nfa_targ_state_id);
                             }
                         }
                     }
