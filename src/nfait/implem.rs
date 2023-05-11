@@ -59,12 +59,16 @@ impl<Conf, Letter,BP>
     }
 
     fn log_new_node(&mut self,
-                    _context: &Conf::Context,
-                    _param: &Conf::Parameterization,
+                    context: &Conf::Context,
+                    param: &Conf::Parameterization,
                     new_state_id: u32,
-                    _new_node: &Conf::NodeKind) {
+                    new_node: &Conf::NodeKind) {
         // minus 1 because node id in graph_process_manager_core starts at 1
-        self.nodes_ids.insert((new_state_id - 1) as usize);
+        let node_id = (new_state_id - 1) as usize;
+        self.nodes_ids.insert(node_id);
+        if self.builder_printer.is_node_final(context,param,new_node) {
+            self.finals.insert(node_id);
+        }
     }
 
     fn log_new_step(&mut self,
