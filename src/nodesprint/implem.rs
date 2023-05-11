@@ -16,6 +16,7 @@ limitations under the License.
 
 
 
+use std::any::Any;
 use std::fs;
 use std::path::PathBuf;
 
@@ -28,8 +29,12 @@ use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
 use crate::nodesprint::logger::GenericNodesPrintLogger;
 
 
-impl<Conf : AbstractProcessConfiguration>
+impl<Conf : AbstractProcessConfiguration+ 'static>
         AbstractProcessLogger<Conf> for GenericNodesPrintLogger<Conf> {
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 
     fn log_initialize(&mut self) {
         // empties nodesprint directory if exists

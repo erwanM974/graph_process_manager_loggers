@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+use std::any::Any;
 use autour_core::traits::letter::AutLetter;
 use autour_core::traits::repr::AutGraphvizDrawable;
 
@@ -31,10 +32,15 @@ impl<Conf, Letter,BP>
         AbstractProcessLogger<Conf> for GenericNFAITLogger<Conf,Letter,BP>
 
     where
-        Conf : AbstractProcessConfiguration,
-        Letter : AutLetter,
-        BP : NFAITBuilderPrinter<Conf, Letter>
+        Conf : AbstractProcessConfiguration + 'static,
+        Letter : AutLetter + 'static,
+        BP : NFAITBuilderPrinter<Conf, Letter> + 'static
             {
+
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 
     fn log_initialize(&mut self) {
         // nothing
@@ -137,8 +143,8 @@ impl<Conf, Letter,BP>
         let got_nfait = self.get_nfait();
         match &self.draw {
             None => {},
-            Some(format) => {
-                let graph = got_nfait.to_dot(true,
+            Some((access,format)) => {
+                let graph = got_nfait.to_dot(*access,
                                              &hashset!{},
                                              &self.builder_printer);
                 graph.print_dot(&[self.parent_folder.clone()],

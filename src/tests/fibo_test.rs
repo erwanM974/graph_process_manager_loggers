@@ -70,7 +70,7 @@ fn process_fibo() {
     let nfait_printer = CharAsLetterPrinter{};
     let nfait_logger : GenericNFAITLogger<FiboConfig,char,CharAsLetterPrinter> = GenericNFAITLogger::new(nfait_printer,
                                                                                      "fib_nfait".to_string(),
-                                                                                     Some(GraphVizOutputFormat::svg),
+                                                                                     Some((true,GraphVizOutputFormat::svg)),
                                                                                      fibo_buf.into_os_string().into_string().unwrap());
 
     let init_node = FiboNodeKind::new(0,1);

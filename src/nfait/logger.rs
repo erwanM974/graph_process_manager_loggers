@@ -41,7 +41,10 @@ pub struct GenericNFAITLogger<Conf,Letter,BP>
     pub builder_printer : BP,
     // ***
     pub(crate) name : String,   // name of the generated files (.aaf et soit .svg soit .png)
-    pub(crate) draw : Option<GraphVizOutputFormat>, // whether or not to draw the NFAIT at the end and if so in which format
+    pub(crate) draw : Option<(bool,GraphVizOutputFormat)>, // whether or not to draw the NFAIT at the end and if so:
+                                            // - in which format
+                                            // - and if we should colorize nodes given accessibility
+    // ***
     pub(crate) parent_folder : String,
     // ***
 
@@ -63,7 +66,7 @@ impl<Conf, Letter,BP> GenericNFAITLogger<Conf, Letter,BP> where
 
     pub fn new(builder_printer: BP,
                name: String,
-               draw: Option<GraphVizOutputFormat>,
+               draw: Option<(bool,GraphVizOutputFormat)>,
                parent_folder: String) -> Self {
         Self {
             phantom : std::marker::PhantomData,

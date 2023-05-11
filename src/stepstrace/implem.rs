@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 
+use std::any::Any;
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
@@ -30,8 +31,12 @@ use crate::stepstrace::logger::GenericStepsTraceLogger;
 use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
 
 
-impl<Conf : AbstractProcessConfiguration, ObjectToBuild : ObjectToBuildWhenTracingSteps>
+impl<Conf : AbstractProcessConfiguration + 'static, ObjectToBuild : ObjectToBuildWhenTracingSteps + 'static>
         AbstractProcessLogger<Conf> for GenericStepsTraceLogger<Conf,ObjectToBuild> {
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 
     fn log_initialize(&mut self) {
         // empties tracegen directory if exists

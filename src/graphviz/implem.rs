@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 
+use std::any::Any;
 use std::fs;
 use graphviz_dot_builder::colors::GraphvizColor;
 use graphviz_dot_builder::edge::edge::GraphVizEdge;
@@ -36,7 +37,11 @@ use crate::graphviz::format::GraphVizLoggerNodeFormat;
 use crate::graphviz::logger::GenericGraphVizLogger;
 
 
-impl<Conf : AbstractProcessConfiguration> AbstractProcessLogger<Conf> for GenericGraphVizLogger<Conf> {
+impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> for GenericGraphVizLogger<Conf> {
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 
     fn log_initialize(&mut self) {
         // empties temp directory if exists
