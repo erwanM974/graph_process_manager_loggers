@@ -25,6 +25,8 @@ use crate::graphviz::format::GraphVizLoggerNodeFormat;
 
 pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration> {
 
+    fn repr_static_analysis(&self) -> bool;
+
     fn get_temp_folder(&self) -> &str;
 
     fn get_verdict_color(&self,

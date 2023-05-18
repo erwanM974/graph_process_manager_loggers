@@ -226,58 +226,62 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
                                       parent_node_id: u32,
                                       verdict: &Conf::LocalVerdict,
                                       proof_data : &Conf::StaticLocalVerdictAnalysisProof) {
-        let analysis_cluster = self.drawer.make_static_analysis_as_gvcluster(context,
-                                                                             param,
-                                                                             parent_node_id,
-                                                                             verdict,
-                                                                             proof_data);
-        let verdict_color = self.drawer.get_verdict_color(verdict);
-        // ***
-        let verd_node : GraphVizNode;
-        {
-            let node_gv_options : GraphvizNodeStyle = vec![
-                GraphvizNodeStyleItem::Label( verdict.to_string() ),
-                GraphvizNodeStyleItem::Color( verdict_color.clone() ),
-                GraphvizNodeStyleItem::FontColor( GraphvizColor::beige ),
-                GraphvizNodeStyleItem::FontSize( 16 ),
-                GraphvizNodeStyleItem::FontName( "times-bold".to_string() ),
-                GraphvizNodeStyleItem::Shape(GvNodeShape::Diamond),
-                GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])];
+        if self.drawer.repr_static_analysis() {
+            let analysis_cluster = self.drawer.make_static_analysis_as_gvcluster(context,
+                                                                                 param,
+                                                                                 parent_node_id,
+                                                                                 verdict,
+                                                                                 proof_data);
+            let verdict_color = self.drawer.get_verdict_color(verdict);
             // ***
-            verd_node = GraphVizNode::new(self.drawer.get_verdict_id(parent_node_id),node_gv_options);
-        }
-        // ***
-        let tran_gv_options = vec![GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
-                                   GraphvizEdgeStyleItem::Color( verdict_color )];
-        // ***
-        let (static_analysis_node_id,static_analysis_anchor_id) = self.drawer.get_static_analysis_ids(parent_node_id);
-        let to_ana_edge : GraphVizEdge = match self.drawer.get_node_format() {
-            GraphVizLoggerNodeFormat::AnchoredCluster => {
-                GraphVizEdge::new(self.drawer.get_anchor_id(parent_node_id),
-                                  Some(self.drawer.get_node_id(parent_node_id)),
-                                  static_analysis_anchor_id.clone(),
-                                  Some(static_analysis_node_id.clone()),
-                                  tran_gv_options.clone())
-            },
-            GraphVizLoggerNodeFormat::SimpleNode => {
-                GraphVizEdge::new(self.drawer.get_node_id(parent_node_id),
-                                  None,
-                                  static_analysis_anchor_id.clone(),
-                                  Some(static_analysis_node_id.clone()),
-                                  tran_gv_options.clone())
+            let verd_node : GraphVizNode;
+            {
+                let node_gv_options : GraphvizNodeStyle = vec![
+                    GraphvizNodeStyleItem::Label( verdict.to_string() ),
+                    GraphvizNodeStyleItem::Color( verdict_color.clone() ),
+                    GraphvizNodeStyleItem::FontColor( GraphvizColor::beige ),
+                    GraphvizNodeStyleItem::FontSize( 16 ),
+                    GraphvizNodeStyleItem::FontName( "times-bold".to_string() ),
+                    GraphvizNodeStyleItem::Shape(GvNodeShape::Diamond),
+                    GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])];
+                // ***
+                verd_node = GraphVizNode::new(self.drawer.get_verdict_id(parent_node_id),node_gv_options);
             }
-        };
-        let to_verd_edge = GraphVizEdge::new(
-            static_analysis_anchor_id,
-            Some(static_analysis_node_id),
-            verd_node.id.clone(),
-            None,
-            tran_gv_options);
-        // ***
-        self.graph.add_cluster(analysis_cluster);
-        self.graph.add_node(verd_node);
-        self.graph.add_edge(to_ana_edge);
-        self.graph.add_edge(to_verd_edge);
+            // ***
+            let tran_gv_options = vec![GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
+                                       GraphvizEdgeStyleItem::Color( verdict_color )];
+            // ***
+            let (static_analysis_node_id,static_analysis_anchor_id) = self.drawer.get_static_analysis_ids(parent_node_id);
+            let to_ana_edge : GraphVizEdge = match self.drawer.get_node_format() {
+                GraphVizLoggerNodeFormat::AnchoredCluster => {
+                    GraphVizEdge::new(self.drawer.get_anchor_id(parent_node_id),
+                                      Some(self.drawer.get_node_id(parent_node_id)),
+                                      static_analysis_anchor_id.clone(),
+                                      Some(static_analysis_node_id.clone()),
+                                      tran_gv_options.clone())
+                },
+                GraphVizLoggerNodeFormat::SimpleNode => {
+                    GraphVizEdge::new(self.drawer.get_node_id(parent_node_id),
+                                      None,
+                                      static_analysis_anchor_id.clone(),
+                                      Some(static_analysis_node_id.clone()),
+                                      tran_gv_options.clone())
+                }
+            };
+            let to_verd_edge = GraphVizEdge::new(
+                static_analysis_anchor_id,
+                Some(static_analysis_node_id),
+                verd_node.id.clone(),
+                None,
+                tran_gv_options);
+            // ***
+            self.graph.add_cluster(analysis_cluster);
+            self.graph.add_node(verd_node);
+            self.graph.add_edge(to_ana_edge);
+            self.graph.add_edge(to_verd_edge);
+        } else {
+            self.log_verdict_on_no_child(context,param,parent_node_id,verdict);
+        }
     }
 
     fn log_verdict_on_no_child(&mut self,

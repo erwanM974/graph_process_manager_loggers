@@ -42,6 +42,10 @@ impl FiboProcessDrawer {
 
 impl GraphVizProcessDrawer<FiboConfig> for FiboProcessDrawer {
 
+    fn repr_static_analysis(&self) -> bool {
+        false
+    }
+
     fn get_temp_folder(&self) -> &str {
         &self.temp_folder
     }
