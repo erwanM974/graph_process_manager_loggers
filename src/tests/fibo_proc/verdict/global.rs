@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 
+use std::fmt;
 use graph_process_manager_core::manager::verdict::AbstractGlobalVerdict;
 use crate::tests::fibo_proc::verdict::local::FiboLocalVerdict;
 
@@ -22,9 +23,9 @@ use crate::tests::fibo_proc::verdict::local::FiboLocalVerdict;
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct FiboGlobalVerdict{}
 
-impl std::string::ToString for FiboGlobalVerdict {
-    fn to_string(&self) -> String {
-        "".to_string()
+impl fmt::Display for FiboGlobalVerdict {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,"")
     }
 }
 

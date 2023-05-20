@@ -16,6 +16,7 @@ limitations under the License.
 
 
 
+use std::fmt;
 use graph_process_manager_core::handler::filter::AbstractFilter;
 
 use crate::tests::fibo_proc::filter::elim::FiboFilterEliminationKind;
@@ -23,9 +24,9 @@ use crate::tests::fibo_proc::filter::elim::FiboFilterEliminationKind;
 
 pub struct FiboFilterCriterion {}
 
-impl std::string::ToString for FiboFilterCriterion {
-    fn to_string(&self) -> String {
-        "".to_string()
+impl fmt::Display for FiboFilterCriterion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,"")
     }
 }
 
@@ -35,14 +36,14 @@ pub enum FiboFilter {
     MaxNodeNumber(u32)
 }
 
-impl std::string::ToString for FiboFilter {
-    fn to_string(&self) -> String {
+impl fmt::Display for FiboFilter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             FiboFilter::MaxProcessDepth(num) => {
-                return format!("MaxDepth={}",num);
+                write!(f,"MaxDepth={}",num)
             },
             FiboFilter::MaxNodeNumber(num) => {
-                return format!("MaxNum={}",num);
+                write!(f,"MaxNum={}",num)
             }
         }
     }

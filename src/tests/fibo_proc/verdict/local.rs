@@ -15,14 +15,14 @@ limitations under the License.
 */
 
 
-
+use std::fmt;
 
 pub struct FiboLocalVerdict{}
 
-impl std::string::ToString for FiboLocalVerdict {
+impl fmt::Display for FiboLocalVerdict {
 
-    fn to_string(&self) -> String {
-        "".to_string()
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,"")
     }
 
 }

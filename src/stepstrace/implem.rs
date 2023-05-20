@@ -40,13 +40,9 @@ impl<Conf : AbstractProcessConfiguration + 'static, ObjectToBuild : ObjectToBuil
 
     fn log_initialize(&mut self) {
         // empties tracegen directory if exists
-        if let Err(e) = fs::remove_dir_all(&self.parent_folder) {
-            println!("error during logger initialization : {:?} ", e);
-        }
+        fs::remove_dir_all(&self.parent_folder);
         // creates tracegen directory
-        if let Err(e) = fs::create_dir_all(&self.parent_folder) {
-            println!("error during logger initialization : {:?} ", e);
-        }
+        fs::create_dir_all(&self.parent_folder);
     }
 
     fn log_parameterization(&mut self,
@@ -101,17 +97,18 @@ impl<Conf : AbstractProcessConfiguration + 'static, ObjectToBuild : ObjectToBuil
         };
 
         if self.printer.should_print_on_node_reached(context, param, target_node, target_depth) {
-            let mut obj_id = 1;
             for o in &new_objects {
+                /*
                 let file_name = format!("{:}_node{:}_from{:}_o{:}.{:}",
                                         self.prefix,
                                         target_state_id,
                                         origin_state_id,
                                         obj_id,
-                                        self.file_extension);
+                                        self.file_extension);*/
+                self.trace_counter += 1;
+                let file_name = format!("{:}{:}.{:}",self.prefix,self.trace_counter,self.file_extension);
                 let path_buf : PathBuf = [&self.parent_folder, &file_name].iter().collect();
                 self.printer.print_object(context, param, o, path_buf.as_path());
-                obj_id += 1;
             }
         }
 

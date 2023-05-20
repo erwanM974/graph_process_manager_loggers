@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+use std::fmt;
 use crate::tests::fibo_proc::step::FiboStepKind;
 use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
 
@@ -28,9 +29,9 @@ impl FiboStepsTrace {
     }
 }
 
-impl std::string::ToString for FiboStepsTrace {
-    fn to_string(&self) -> String {
-        format!("{:?}", self.trace)
+impl fmt::Display for FiboStepsTrace {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,"{:?}", self.trace)
     }
 }
 

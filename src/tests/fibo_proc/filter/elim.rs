@@ -15,19 +15,21 @@ limitations under the License.
 */
 
 
+use std::fmt;
+
 pub enum FiboFilterEliminationKind {
     MaxProcessDepth,
     MaxNodeNumber
 }
 
-impl std::string::ToString for FiboFilterEliminationKind {
-    fn to_string(&self) -> String {
+impl fmt::Display for FiboFilterEliminationKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             FiboFilterEliminationKind::MaxProcessDepth => {
-                "MaxDepth".to_string()
+                write!(f,"MaxDepth")
             },
             FiboFilterEliminationKind::MaxNodeNumber => {
-                "MaxNum".to_string()
+                write!(f,"MaxNum")
             }
         }
     }

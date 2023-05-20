@@ -36,7 +36,9 @@ pub struct GenericStepsTraceLogger<Conf : AbstractProcessConfiguration,
     // ***
     pub(crate) prefix : String,
     pub(crate) file_extension : String,
-    pub(crate) parent_folder : String
+    pub(crate) parent_folder : String,
+    // ***
+    pub(crate) trace_counter : u32
 }
 
 impl<Conf: AbstractProcessConfiguration,
@@ -45,7 +47,7 @@ impl<Conf: AbstractProcessConfiguration,
     pub fn new(printer: Box<dyn StepsTraceProcessPrinter<Conf, ObjectToBuild>>,
                prefix: String, file_extension: String,
                parent_folder: String) -> Self {
-        Self { printer, trace_map : hashmap!{}, prefix, file_extension, parent_folder }
+        Self { printer, trace_map : hashmap!{}, prefix, file_extension, parent_folder, trace_counter:0 }
     }
 }
 

@@ -15,18 +15,16 @@ limitations under the License.
 */
 
 
-
-
-
+use std::fmt;
 use graph_process_manager_core::delegate::priorities::AbstractPriorities;
 
 use crate::tests::fibo_proc::step::FiboStepKind;
 
 pub struct FiboPriorities {}
 
-impl ToString for FiboPriorities {
-    fn to_string(&self) -> String {
-        return "[]".to_string();
+impl fmt::Display for FiboPriorities {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,"[]")
     }
 }
 

@@ -70,8 +70,8 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
 
         if self.display_legend {
             let mut options_str : Vec<String> = parameterization.get_param_as_strings();
-            options_str.push( format!("strategy={}", strategy.to_string()) );
-            options_str.push( format!("priorities={}", priorities.to_string()) );
+            options_str.push( format!("strategy={}", strategy) );
+            options_str.push( format!("priorities={}", priorities) );
             {
                 let filters_strs : Vec<String> = filters.iter()
                     .map(|f| f.to_string()).collect();
@@ -83,7 +83,7 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
                     options_str.push( "goal=None".to_string() );
                 },
                 Some(ref target_verdict) => {
-                    options_str.push( format!("goal={}", target_verdict.to_string()) );
+                    options_str.push( format!("goal={}", target_verdict) );
                 }
             }
             options_str.push( format!("memoize={}", memoize) );
@@ -334,7 +334,7 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
     fn log_terminate(&mut self,
                      global_verdict: &Conf::GlobalVerdict) {
         if Conf::GlobalVerdict::is_verdict_pertinent_for_process() && self.display_legend {
-            let verd_str = format!("verdict={}", global_verdict.to_string());
+            let verd_str = format!("verdict={}", global_verdict);
             let legend_node_gv_options : GraphvizNodeStyle = vec![
                 GraphvizNodeStyleItem::Label( verd_str ),
                 GraphvizNodeStyleItem::Shape(GvNodeShape::Rectangle),
