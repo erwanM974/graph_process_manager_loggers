@@ -38,13 +38,9 @@ impl<Conf : AbstractProcessConfiguration+ 'static>
 
     fn log_initialize(&mut self) {
         // empties nodesprint directory if exists
-        if let Err(e) = fs::remove_dir_all(&self.parent_folder) {
-            println!("error during logger initialization : {:?} ", e);
-        }
+        fs::remove_dir_all(&self.parent_folder);
         // creates nodesprint directory
-        if let Err(e) = fs::create_dir_all(&self.parent_folder) {
-            println!("error during logger initialization : {:?} ", e);
-        }
+        fs::create_dir_all(&self.parent_folder);
     }
 
     fn log_parameterization(&mut self,

@@ -45,18 +45,12 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
 
     fn log_initialize(&mut self) {
         // empties temp directory if exists
-        if let Err(e) = fs::remove_dir_all(self.drawer.get_temp_folder()) {
-            println!("error during logger initialization : {:?} ", e);
-        }
+        fs::remove_dir_all(self.drawer.get_temp_folder());
         // creates temp directory if not exist
-        if let Err(e) = fs::create_dir_all(self.drawer.get_temp_folder()) {
-            println!("error during logger initialization : {:?} ", e);
-        }
+        fs::create_dir_all(self.drawer.get_temp_folder());
         // creates parent directory if not exist
         if self.parent_folder != *"" {
-            if let Err(e) = fs::create_dir_all(&self.parent_folder) {
-                println!("error during logger initialization : {:?} ", e);
-            }
+            fs::create_dir_all(&self.parent_folder);
         }
     }
 
