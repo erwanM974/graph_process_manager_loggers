@@ -57,11 +57,9 @@ impl AbstractProcessHandler<FiboConfig> for FiboProcessHandler {
 
     fn collect_next_steps(_context: &FiboContext,
                           _param : &FiboParameterization,
-                          parent_node_id: u32,
                           _parent_node_kind: &FiboNodeKind)
-                -> (u32, Vec<GenericStep<FiboStepKind>>) {
-        let to_enqueue = vec![GenericStep::new(parent_node_id, 0, FiboStepKind::Next)];
-        return (1,to_enqueue);
+                -> Vec<FiboStepKind> {
+        vec![FiboStepKind::Next]
     }
 
     fn get_local_verdict_when_no_child(_context: &FiboContext,

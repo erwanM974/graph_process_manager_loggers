@@ -14,7 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod fibo_proc;
-pub mod fibo_test;
-pub mod tree_proc;
-pub mod tree_test;
+
+use std::fmt;
+use graph_process_manager_core::delegate::priorities::AbstractPriorities;
+
+use crate::tests::tree_proc::step::TreeStepKind;
+
+pub struct TreePriorities {}
+
+impl fmt::Display for TreePriorities {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,"[]")
+    }
+}
+
+impl AbstractPriorities<TreeStepKind> for TreePriorities {
+    fn get_priority_of_step(&self,
+                            _step: &TreeStepKind) -> i32 {
+        0
+    }
+}

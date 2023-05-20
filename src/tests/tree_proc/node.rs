@@ -14,7 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod fibo_proc;
-pub mod fibo_test;
-pub mod tree_proc;
-pub mod tree_test;
+
+
+
+use std::hash::Hash;
+
+use graph_process_manager_core::manager::config::AbstractNodeKind;
+
+
+#[derive(Clone, PartialEq, Debug, Eq, Hash)]
+pub struct TreeNodeKind {
+    pub word : String
+}
+
+impl TreeNodeKind {
+    pub fn new(word : String) -> Self {
+        Self { word}
+    }
+}
+
+impl AbstractNodeKind for TreeNodeKind {
+    fn is_included_for_memoization(&self, memoized_node: &Self) -> bool {
+        memoized_node.word == self.word
+    }
+}
+

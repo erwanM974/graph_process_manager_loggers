@@ -14,7 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod fibo_proc;
-pub mod fibo_test;
-pub mod tree_proc;
-pub mod tree_test;
+
+
+
+use std::fmt;
+use std::fmt::Formatter;
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub enum TreeStepKind {
+    A,B
+}
+
+impl fmt::Display for TreeStepKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            TreeStepKind::A => {
+                write!(f, "A")
+            },
+            TreeStepKind::B => {
+                write!(f, "B")
+            }
+        }
+    }
+}

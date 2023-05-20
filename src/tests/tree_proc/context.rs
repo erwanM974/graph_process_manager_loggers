@@ -14,7 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod fibo_proc;
-pub mod fibo_test;
-pub mod tree_proc;
-pub mod tree_test;
+use graph_process_manager_core::manager::config::AbstractProcessParameterization;
+
+
+pub struct TreeContext {}
+
+pub struct TreeParameterization {}
+
+impl AbstractProcessParameterization for TreeParameterization {
+    fn get_param_as_strings(&self) -> Vec<String> {
+        vec!["process = binary tree".to_string()]
+    }
+}
