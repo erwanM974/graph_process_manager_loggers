@@ -1,6 +1,6 @@
 [package]
 name = "graph_process_manager_loggers"
-version = "0.1.11"
+version = "0.1.12"
 authors = ["Erwan Mahe"]
 edition = "2021"
 
@@ -17,5 +17,5 @@ keywords = ["graph", "tree", "process", "traversal", "heuristics"]
 maplit = "1.0.2"                                # for !hashset macro etc
 graph_process_manager_core = "0.1.10"
 graphviz_dot_builder = "0.1.2"
-autour_core = "0.1.2"
+autour_core = "0.1.3"
 itertools = "0.10.5"
