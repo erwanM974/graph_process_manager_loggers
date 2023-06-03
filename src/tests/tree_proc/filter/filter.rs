@@ -19,7 +19,6 @@ limitations under the License.
 use std::fmt;
 use graph_process_manager_core::handler::filter::AbstractFilter;
 
-use crate::tests::fibo_proc::filter::elim::FiboFilterEliminationKind;
 use crate::tests::tree_proc::filter::elim::TreeFilterEliminationKind;
 
 

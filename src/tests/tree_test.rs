@@ -17,7 +17,6 @@ limitations under the License.
 
 use std::path::PathBuf;
 
-use autour_core::printers::p_chars::CharAsLetterPrinter;
 use graph_process_manager_core::delegate::delegate::GenericProcessDelegate;
 use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
 use graph_process_manager_core::manager::manager::GenericProcessManager;
@@ -26,9 +25,6 @@ use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
 use crate::graphviz::logger::GenericGraphVizLogger;
-use crate::nfait::logger::GenericNFAITLogger;
-use crate::nodesprint::logger::GenericNodesPrintLogger;
-use crate::stepstrace::logger::GenericStepsTraceLogger;
 
 use crate::tests::tree_proc::conf::TreeConfig;
 use crate::tests::tree_proc::context::{TreeContext, TreeParameterization};
