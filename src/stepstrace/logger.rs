@@ -25,8 +25,14 @@ use crate::stepstrace::printer::StepsTraceProcessPrinter;
 pub struct GenericStepsTraceLogger<Conf : AbstractProcessConfiguration,
             ObjectToBuild : ObjectToBuildWhenTracingSteps> {
     // ***
+    // object tasked with:
+    // - providing the initial object
+    // - adding steps to older objects to get new objects
+    // - determining when and how to print these objects
     pub(crate) printer : Box<dyn StepsTraceProcessPrinter<Conf, ObjectToBuild>>,
     // ***
+    // if we want to avoid generate duplicated object, this will store already printed ones to avoid this
+    pub(crate) anti_duplication_memoizer : Option<HashSet<ObjectToBuild>>,
     // maps node id u32 to objects to build
     // the initial node of id 1 has an initial object
     // subsequents objects are build progressively once nodes are reached from the initial node of id 1
@@ -34,10 +40,11 @@ pub struct GenericStepsTraceLogger<Conf : AbstractProcessConfiguration,
     // because there may be several distinct paths to the same node if memoization is used in the process
     pub(crate) trace_map : HashMap<u32,HashSet<ObjectToBuild>>,
     // ***
+    // attributes for determining in which directories / files to print created objects
     pub(crate) prefix : String,
     pub(crate) file_extension : String,
     pub(crate) parent_folder : String,
-    // ***
+    // counts the total number of printed objects and gives the name of newly printed objects
     pub(crate) trace_counter : u32
 }
 
@@ -45,9 +52,22 @@ impl<Conf: AbstractProcessConfiguration,
         ObjectToBuild: ObjectToBuildWhenTracingSteps>
             GenericStepsTraceLogger<Conf, ObjectToBuild> {
     pub fn new(printer: Box<dyn StepsTraceProcessPrinter<Conf, ObjectToBuild>>,
-               prefix: String, file_extension: String,
+               avoid_duplicates : bool,
+               prefix: String,
+               file_extension: String,
                parent_folder: String) -> Self {
-        Self { printer, trace_map : hashmap!{}, prefix, file_extension, parent_folder, trace_counter:0 }
+        let anti_duplication_memoizer : Option<HashSet<ObjectToBuild>> = if avoid_duplicates {
+            Some(HashSet::new())
+        } else {
+            None
+        };
+        Self { printer,
+            anti_duplication_memoizer,
+            trace_map : hashmap!{},
+            prefix,
+            file_extension,
+            parent_folder,
+            trace_counter:0 }
     }
 }
 

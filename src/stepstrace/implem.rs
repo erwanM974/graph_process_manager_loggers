@@ -31,7 +31,8 @@ use crate::stepstrace::logger::GenericStepsTraceLogger;
 use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
 
 
-impl<Conf : AbstractProcessConfiguration + 'static, ObjectToBuild : ObjectToBuildWhenTracingSteps + 'static>
+impl<Conf : AbstractProcessConfiguration + 'static,
+    ObjectToBuild : ObjectToBuildWhenTracingSteps + 'static>
         AbstractProcessLogger<Conf> for GenericStepsTraceLogger<Conf,ObjectToBuild> {
 
     fn as_any(&self) -> &dyn Any {
@@ -69,8 +70,16 @@ impl<Conf : AbstractProcessConfiguration + 'static, ObjectToBuild : ObjectToBuil
                     new_state_id: u32,
                     new_node: &Conf::NodeKind) {
         if new_state_id == 1 {
+            // initializes the objects storage in 'self.trace_map'
+            // with the initial object
             self.trace_map.insert(1,
                                   hashset!{self.printer.get_initial_object(context,param,new_node)});
+        } else {
+            // creates an entry for the new node
+            // it will be completed when log_new_step is called
+            self.trace_map.insert(new_state_id,
+                                  hashset!{});
+            // removal of entries is handled in 'log_notify_last_child_of_node_processed'
         }
     }
 
@@ -83,38 +92,39 @@ impl<Conf : AbstractProcessConfiguration + 'static, ObjectToBuild : ObjectToBuil
                     target_node : &Conf::NodeKind,
                     target_depth : u32) {
 
+        // collect objects already build on the origin node
         let parent_node_objects = self.trace_map.get(&origin_state_id).unwrap();
+        // add the steps to all of these objects to obtain the newly reached objects
         let objects_from_step : HashSet<ObjectToBuild> = parent_node_objects.iter()
             .map(|o|self.printer.add_step_to_object(context,param,o, step))
             .collect();
 
+        // filters out objects that have already been printed if memoizer is ON
         let new_objects : HashSet<ObjectToBuild> =
-            if let Some(already_reached_objs) = self.trace_map.get_mut(&target_state_id) {
-            objects_from_step.into_iter().filter(|o| !already_reached_objs.contains(o)).collect()
-        } else {
-            self.trace_map.insert(target_state_id, hashset!{});
-            objects_from_step
-        };
+            match &mut self.anti_duplication_memoizer {
+                None => {
+                    objects_from_step
+                },
+                Some(memo) => {
+                    objects_from_step.into_iter().filter(|o| !memo.contains(o)).collect()
+                }
+            };
 
         if self.printer.should_print_on_node_reached(context, param, target_node, target_depth) {
             for o in &new_objects {
-                /*
-                let file_name = format!("{:}_node{:}_from{:}_o{:}.{:}",
-                                        self.prefix,
-                                        target_state_id,
-                                        origin_state_id,
-                                        obj_id,
-                                        self.file_extension);*/
                 self.trace_counter += 1;
                 let file_name = format!("{:}{:}.{:}",self.prefix,self.trace_counter,self.file_extension);
                 let path_buf : PathBuf = [&self.parent_folder, &file_name].iter().collect();
                 self.printer.print_object(context, param, o, path_buf.as_path());
+                if let Some(memo) = &mut self.anti_duplication_memoizer {
+                    memo.insert(o.clone());
+                }
             }
         }
 
-        if let Some(objs_on_node) = self.trace_map.get_mut(&target_state_id) {
-            objs_on_node.extend(new_objects);
-        }
+        // updates objects built on the target node
+        let objs_on_node = self.trace_map.get_mut(&target_state_id).unwrap();
+        objs_on_node.extend(new_objects);
     }
 
     fn log_verdict_on_no_child(&mut self,

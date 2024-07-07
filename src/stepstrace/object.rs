@@ -14,4 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub trait ObjectToBuildWhenTracingSteps : std::cmp::PartialEq + std::cmp::Eq + std::hash::Hash {}
+pub trait ObjectToBuildWhenTracingSteps : std::cmp::PartialEq + std::cmp::Eq + std::hash::Hash + std::clone::Clone {}

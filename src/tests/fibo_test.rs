@@ -63,6 +63,7 @@ fn process_fibo() {
 
     let steps_printer = FiboProcessStepPrinter{};
     let steps_logger : GenericStepsTraceLogger<FiboConfig,FiboStepsTrace> = GenericStepsTraceLogger::new(Box::new(steps_printer),
+                                                                                                         true,
                                                                                                          "fib_trace".to_string(),
                                                                                                          "txt".to_string(),
                                                                                                          fibo_buf.clone().into_os_string().into_string().unwrap());

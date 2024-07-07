@@ -36,9 +36,9 @@ pub trait StepsTraceProcessPrinter<Conf : AbstractProcessConfiguration, ObjectTo
                           step : &Conf::StepKind) -> ObjectToBuild;
 
     fn should_print_on_node_reached(&self,
-                      context: &Conf::Context,
-                      param: &Conf::Parameterization,
-                      node: &Conf::NodeKind,
+                                    context: &Conf::Context,
+                                    param: &Conf::Parameterization,
+                                    node: &Conf::NodeKind,
                                     node_depth : u32) -> bool;
 
     fn print_object(&self,
