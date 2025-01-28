@@ -16,14 +16,28 @@ limitations under the License.
 
 
 
-#[derive(Clone, PartialEq, Debug, Eq, Hash)]
-pub enum GraphVizProcessLoggerLayout {
-    Horizontal,
-    Vertical
+
+use std::fmt;
+use std::fmt::Formatter;
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub struct TreeOfTreesStepKind {
+    pub letter : char,
+    pub on_the_left : bool
 }
 
-#[derive(Clone, Copy, PartialEq, Debug, Eq, Hash)]
-pub enum GraphVizLoggerNodeFormat {
-    AnchoredCluster,
-    SimpleNode
+impl TreeOfTreesStepKind {
+    pub fn new(letter : char,on_the_left : bool) -> Self {
+        Self {letter,on_the_left}
+    }
+}
+
+impl fmt::Display for TreeOfTreesStepKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        if self.on_the_left {
+            write!(f, "{}", &format!("←{}", self.letter) )
+        } else {
+            write!(f, "{}", &format!("{}→", self.letter) )
+        }
+    }
 }

@@ -15,17 +15,20 @@ limitations under the License.
 */
 
 
+use std::collections::HashMap;
 use graphviz_dot_builder::graph::graph::GraphVizDiGraph;
 use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 use graphviz_dot_builder::graph::style::{GraphvizGraphStyleItem,GvGraphRankDir};
+use graphviz_dot_builder::item::cluster::GraphVizCluster;
 
-use crate::graphviz::drawer::GraphVizProcessDrawer;
+use crate::graphviz::process_drawer_trait::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
 
 
 pub struct GenericGraphVizLogger<Conf : AbstractProcessConfiguration> {
     // ***
+    /** the drawer **/
     pub(crate) drawer : Box<dyn GraphVizProcessDrawer<Conf>>,
     // ***
     pub(crate) output_format : GraphVizOutputFormat,
@@ -35,7 +38,17 @@ pub struct GenericGraphVizLogger<Conf : AbstractProcessConfiguration> {
     pub(crate) parent_folder : String,
     pub(crate) output_file_name : String,
     // ***
-    pub(crate) graph : GraphVizDiGraph
+    /** the Graphviz graph that is being built **/
+    pub(crate) graph : GraphVizDiGraph, 
+    // ***
+    /**
+    A map that keeps track of the phase as part of which a given node has been processed
+    A value is absent from that dictionary if the identifier does not yet exists.
+    Or if we do not want to highlight phases.
+    **/
+    pub(crate) nodes_id_to_process_phase_id : HashMap<u32,u32>,
+    /** the drawer **/
+    pub(crate) process_phases_clusters : HashMap<u32,GraphVizCluster>
 }
 
 impl<Conf : AbstractProcessConfiguration> GenericGraphVizLogger<Conf> {
@@ -56,8 +69,13 @@ impl<Conf : AbstractProcessConfiguration> GenericGraphVizLogger<Conf> {
         };
         let style = vec![GraphvizGraphStyleItem::Rankdir(rankdir)];
         let graph = GraphVizDiGraph::new(style);
+        let nodes_id_to_process_phase_id : HashMap<u32,u32> = HashMap::new();
+        let process_phases_clusters = HashMap::new();
         // ***
-        Self { drawer, output_format, display_legend, parent_folder, output_file_name, graph }
+        Self {
+            drawer, output_format, display_legend, parent_folder, output_file_name,
+            graph, nodes_id_to_process_phase_id, process_phases_clusters
+        }
     }
 }
 

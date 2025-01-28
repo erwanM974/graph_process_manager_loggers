@@ -62,6 +62,6 @@ impl StepsTraceProcessPrinter<FiboConfig,FiboStepsTrace> for FiboProcessStepPrin
                     path: &Path) {
         let mut file = File::create(path).unwrap();
         let as_string = object.to_string();
-        file.write(as_string.as_bytes() );
+        let _ = file.write(as_string.as_bytes() );
     }
 }

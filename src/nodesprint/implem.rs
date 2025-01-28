@@ -38,9 +38,9 @@ impl<Conf : AbstractProcessConfiguration+ 'static>
 
     fn log_initialize(&mut self) {
         // empties nodesprint directory if exists
-        fs::remove_dir_all(&self.parent_folder);
+        let _ = fs::remove_dir_all(&self.parent_folder);
         // creates nodesprint directory
-        fs::create_dir_all(&self.parent_folder);
+        let _ = fs::create_dir_all(&self.parent_folder);
     }
 
     fn log_parameterization(&mut self,

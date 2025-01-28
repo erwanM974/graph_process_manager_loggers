@@ -41,8 +41,8 @@ use crate::tests::fibo_proc::step::FiboStepKind;
 
 #[test]
 fn process_fibo() {
-    let fibo_buf : PathBuf = ["c:\\", "Users", "ErwanMahe", "IdeaProjects", "graph_process_manager_loggers", "fibo"].iter().collect();
-    let temp_buf : PathBuf = ["c:\\", "Users", "ErwanMahe", "IdeaProjects", "graph_process_manager_loggers", "fibo_temp"].iter().collect();
+    let fibo_buf : PathBuf = [".", "fibo"].iter().collect();
+    let temp_buf : PathBuf = [".", "fibo_temp"].iter().collect();
 
     let output_name = "fibo".to_string();
 

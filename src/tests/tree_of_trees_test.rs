@@ -26,41 +26,31 @@ use graphviz_dot_builder::traits::GraphVizOutputFormat;
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
 use crate::graphviz::logger::GenericGraphVizLogger;
 
-use crate::tests::tree_proc::conf::TreeConfig;
-use crate::tests::tree_proc::context::{TreeContext, TreeParameterization};
-use crate::tests::tree_proc::filter::filter::TreeFilter;
-use crate::tests::tree_proc::loggers::glog::drawer::TreeProcessDrawer;
-use crate::tests::tree_proc::node::TreeNodeKind;
-use crate::tests::tree_proc::priorities::TreePriorities;
-use crate::tests::tree_proc::step::TreeStepKind;
+use crate::tests::tree_of_trees_proc::conf::TreeOfTreesConfig;
+use crate::tests::tree_of_trees_proc::context::{TreeOfTreesContext, TreeOfTreesParameterization};
+use crate::tests::tree_of_trees_proc::filter::filter::TreeOfTreesFilter;
+use crate::tests::tree_of_trees_proc::loggers::glog::drawer::TreeOfTreesProcessDrawer;
+use crate::tests::tree_of_trees_proc::node::TreeOfTreesNodeKind;
+use crate::tests::tree_of_trees_proc::priorities::TreeOfTreesPriorities;
+use crate::tests::tree_of_trees_proc::step::TreeOfTreesStepKind;
 
 #[test]
-fn process_tree() {
-    let tree_buf : PathBuf = [".", "tree"].iter().collect();
-    let temp_buf : PathBuf = [".", "tree_temp"].iter().collect();
+fn process_tree_of_trees() {
+    let tree_buf : PathBuf = [".", "tree_of_trees"].iter().collect();
+    let temp_buf : PathBuf = [".", "tree_of_trees_temp"].iter().collect();
 
-    explo_tree(tree_buf.clone(),
+    explo_tree_of_trees(tree_buf.clone(),
                temp_buf.clone(),
                "DFS".to_string(),
                QueueSearchStrategy::DFS,
-               false);
-    explo_tree(tree_buf.clone(),
-               temp_buf.clone(),
-               "BFS".to_string(),
-               QueueSearchStrategy::BFS,
-               false);
-    explo_tree(tree_buf.clone(),
-               temp_buf.clone(),
-               "HCS".to_string(),
-               QueueSearchStrategy::HCS,
                false);
 }
 
 
 
-fn explo_tree(tree_buf : PathBuf, temp_buf : PathBuf, name : String, queue_strategy : QueueSearchStrategy, memoize : bool) {
-    let drawer = TreeProcessDrawer::new(temp_buf.into_os_string().into_string().unwrap());
-    let graphic_logger : GenericGraphVizLogger<TreeConfig> = GenericGraphVizLogger::new(
+fn explo_tree_of_trees(tree_buf : PathBuf, temp_buf : PathBuf, name : String, queue_strategy : QueueSearchStrategy, memoize : bool) {
+    let drawer = TreeOfTreesProcessDrawer::new(temp_buf.into_os_string().into_string().unwrap());
+    let graphic_logger : GenericGraphVizLogger<TreeOfTreesConfig> = GenericGraphVizLogger::new(
         Box::new(drawer),
         GraphVizOutputFormat::svg,
         GraphVizProcessLoggerLayout::Vertical,
@@ -68,18 +58,18 @@ fn explo_tree(tree_buf : PathBuf, temp_buf : PathBuf, name : String, queue_strat
         tree_buf.clone().into_os_string().into_string().unwrap(),
         format!("proc_{}",name));
 
-    let init_node = TreeNodeKind::new("O".to_string());
+    let init_node = TreeOfTreesNodeKind::new('0',None,None);
 
-    let process_ctx = TreeContext{};
-    let priorities : GenericProcessPriorities<TreePriorities> =
-        GenericProcessPriorities::new(TreePriorities{},false);
-    let delegate : GenericProcessDelegate<TreeStepKind,TreeNodeKind,TreePriorities> =
+    let process_ctx = TreeOfTreesContext{};
+    let priorities : GenericProcessPriorities<TreeOfTreesPriorities> =
+        GenericProcessPriorities::new(TreeOfTreesPriorities{},false);
+    let delegate : GenericProcessDelegate<TreeOfTreesStepKind,TreeOfTreesNodeKind,TreeOfTreesPriorities> =
         GenericProcessDelegate::new(queue_strategy,priorities);
-    let mut manager : GenericProcessManager<TreeConfig> =
+    let mut manager : GenericProcessManager<TreeOfTreesConfig> =
         GenericProcessManager::new(process_ctx,
-                                   TreeParameterization{},
+                                   TreeOfTreesParameterization{},
                                    delegate,
-                                   vec![Box::new(TreeFilter::MaxProcessDepth(4)),Box::new(TreeFilter::MaxNodeNumber(8))],
+                                   vec![Box::new(TreeOfTreesFilter::MaxProcessDepth(3)),Box::new(TreeOfTreesFilter::MaxNodeNumber(7))],
                                    vec![Box::new(graphic_logger)],
                                    None,
                                    memoize);

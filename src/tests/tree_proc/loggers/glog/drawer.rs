@@ -17,10 +17,9 @@ limitations under the License.
 
 
 use graphviz_dot_builder::colors::GraphvizColor;
-use graphviz_dot_builder::item::cluster::GraphVizCluster;
-use graphviz_dot_builder::item::node::node::GraphVizNode;
+use graphviz_dot_builder::item::item::GraphVizGraphItem;
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape};
-use crate::graphviz::drawer::GraphVizProcessDrawer;
+use crate::graphviz::process_drawer_trait::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
 use crate::tests::tree_proc::conf::{TreeConfig, TreeStaticProof};
 use crate::tests::tree_proc::context::{TreeContext, TreeParameterization};
@@ -29,13 +28,12 @@ use crate::tests::tree_proc::step::TreeStepKind;
 use crate::tests::tree_proc::verdict::local::TreeLocalVerdict;
 
 pub struct TreeProcessDrawer {
-    pub temp_folder : String,
-    pub node_format : GraphVizLoggerNodeFormat
+    pub temp_folder : String
 }
 
 impl TreeProcessDrawer {
     pub fn new(temp_folder: String) -> Self {
-        TreeProcessDrawer { temp_folder, node_format:GraphVizLoggerNodeFormat::SimpleNode }
+        TreeProcessDrawer { temp_folder }
     }
 }
 
@@ -55,72 +53,60 @@ impl GraphVizProcessDrawer<TreeConfig> for TreeProcessDrawer {
         GraphvizColor::black
     }
 
-    fn make_static_analysis_as_gvcluster(&self,
+    fn get_static_analysis_as_gvnode_style(&self,
                                          _context: &TreeContext,
                                          _param : &TreeParameterization,
-                                         _parent_state_id: u32,
                                          _verdict: &TreeLocalVerdict,
-                                         _data_proof: &TreeStaticProof) -> GraphVizCluster {
+                                         _data_proof: &TreeStaticProof,
+                                           _ : &str) -> GraphvizNodeStyle {
         panic!("should never be called")
     }
 
-    fn make_step_gvnode(&self,
+    fn get_step_gvnode_style(&self,
                         _context: &TreeContext,
                         _param : &TreeParameterization,
-                        origin_state_id: u32,
-                        target_state_id: u32,
-                        step: &TreeStepKind) -> GraphVizNode {
-
-        let step_name = format!("s_{}_{}", origin_state_id, target_state_id);
+                        step: &TreeStepKind,
+                             _step_name : &str) -> GraphvizNodeStyle {
         let gv_node_options : GraphvizNodeStyle = vec![
             GraphvizNodeStyleItem::Label( step.to_string() ),
             GraphvizNodeStyleItem::FillColor( GraphvizColor::white ),
             GraphvizNodeStyleItem::Shape(GvNodeShape::Rectangle)];
         // ***
-        GraphVizNode::new(step_name,gv_node_options)
+        gv_node_options
     }
 
-    fn make_node_gvitem_as_gvcluster(&self,
+    fn get_node_as_gvcluster_style(&self,
                                      _context: &TreeContext,
                                      _param: &TreeParameterization,
-                                     _new_state_id: u32,
-                                     _new_node: &TreeNodeKind) -> GraphVizCluster {
+                                     _new_node: &TreeNodeKind,
+                                   _cluster_name : &str) -> (GraphvizNodeStyle,Vec<Box<GraphVizGraphItem>>) {
         panic!("should never be called")
     }
 
-    fn make_node_gvitem_as_gvnode(&self,
+    fn get_node_as_gvnode_style(&self,
                                   _context: &TreeContext,
                                   _param: &TreeParameterization,
-                                  new_node_id: u32,
-                                  new_node: &TreeNodeKind) -> GraphVizNode {
-        let node_name = self.get_node_id(new_node_id);
+                                  new_node: &TreeNodeKind, _node_name : &str) -> GraphvizNodeStyle {
         let gv_node_options : GraphvizNodeStyle = vec![
             GraphvizNodeStyleItem::Label( new_node.word.clone() ),
             GraphvizNodeStyleItem::FillColor( GraphvizColor::white ),
             GraphvizNodeStyleItem::Shape(GvNodeShape::Rectangle)];
-        // ***
-        GraphVizNode::new(node_name,gv_node_options)
+        gv_node_options
     }
 
-    fn get_node_format(&self) -> &GraphVizLoggerNodeFormat {
-        &self.node_format
+    fn get_node_format(&self) -> GraphVizLoggerNodeFormat {
+        GraphVizLoggerNodeFormat::SimpleNode
+    }
+    
+    fn get_node_phase_id(&self,
+                         _context: &TreeContext,
+                         _param: &TreeParameterization,
+                         _new_node: &TreeNodeKind) -> Option<u32> {
+        None
+    }
+    
+    fn get_phase_color(&self, _phase_id : u32) -> GraphvizColor {
+        GraphvizColor::black
     }
 
-    fn get_anchor_id(&self,
-                     id: u32) -> String {
-        format!("a{:}", id)
-    }
-
-    fn get_node_id(&self,
-                   id: u32) -> String {
-        format!("n{:}", id)
-    }
-
-    fn get_verdict_id(&self, id: u32) -> String {
-        format!("v{:}", id)
-    }
-
-    fn get_static_analysis_ids(&self, id: u32) -> (String, String) {
-        (format!("stat{:}", id),format!("stat_anchor{:}", id))
-    }
 }

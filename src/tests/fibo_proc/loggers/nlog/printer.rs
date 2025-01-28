@@ -42,6 +42,6 @@ impl NodesPrintProcessPrinter<FiboConfig> for FiboProcessNodePrinter {
                   path: &Path) {
         let mut file = File::create(path).unwrap();
         let as_string = node.current.to_string();
-        file.write(as_string.as_bytes() );
+        let _ = file.write(as_string.as_bytes() );
     }
 }

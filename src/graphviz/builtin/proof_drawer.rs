@@ -14,10 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod fibo_proc;
-pub mod fibo_test;
-pub mod tree_proc;
-pub mod tree_test;
+use std::path::Path;
+use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
 
-pub mod tree_of_trees_proc;
-pub mod tree_of_trees_test;
+pub trait CustomProofDrawerForGraphvizLogger<Conf : AbstractProcessConfiguration> {
+
+    fn draw(&self,
+            context: &Conf::Context,
+            param: &Conf::Parameterization,
+            verdict: &Conf::LocalVerdict,
+            data_proof: &Conf::StaticLocalVerdictAnalysisProof,
+            full_path : &Path);
+
+}
+
+
+

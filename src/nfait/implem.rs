@@ -148,7 +148,7 @@ impl<Conf, Letter,BP>
                 let graph = got_nfait.to_dot(*access,
                                              &hashset!{},
                                              &self.builder_printer);
-                graph.print_dot(&[self.parent_folder.clone()],
+                let _ = graph.print_dot(&[self.parent_folder.clone()],
                                 &self.name,
                                 format);
             }

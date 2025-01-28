@@ -14,10 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-pub mod fibo_proc;
-pub mod fibo_test;
-pub mod tree_proc;
-pub mod tree_test;
 
-pub mod tree_of_trees_proc;
-pub mod tree_of_trees_test;
+use std::fmt;
+
+pub enum TreeOfTreesFilterEliminationKind {
+    MaxProcessDepth,
+    MaxNodeNumber
+}
+
+impl fmt::Display for TreeOfTreesFilterEliminationKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TreeOfTreesFilterEliminationKind::MaxProcessDepth => {
+                write!(f,"MaxDepth")
+            },
+            TreeOfTreesFilterEliminationKind::MaxNodeNumber => {
+                write!(f,"MaxNum")
+            }
+        }
+    }
+}
