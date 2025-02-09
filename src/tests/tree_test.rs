@@ -19,7 +19,7 @@ use std::path::PathBuf;
 
 use graph_process_manager_core::delegate::delegate::GenericProcessDelegate;
 use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
-use graph_process_manager_core::manager::manager::GenericProcessManager;
+use graph_process_manager_core::process::manager::GenericProcessManager;
 use graph_process_manager_core::queued_steps::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 

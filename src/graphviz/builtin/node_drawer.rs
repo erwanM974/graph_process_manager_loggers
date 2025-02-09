@@ -15,15 +15,16 @@ limitations under the License.
 */
 
 use std::path::Path;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 
 pub trait CustomNodeDrawerForGraphvizLogger<Conf : AbstractProcessConfiguration> {
 
-    fn draw(&self,
-            node : &Conf::NodeKind,
-            context: &Conf::Context,
-            parameterization: &Conf::Parameterization,
-            full_path : &Path);
+    fn draw(
+        &self,
+        context_and_param : &Conf::ContextAndParameterization,
+        node : &Conf::DomainSpecificNode,
+        full_path : &Path
+    );
 
 }
 

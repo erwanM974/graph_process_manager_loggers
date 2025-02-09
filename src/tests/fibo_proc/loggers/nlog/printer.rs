@@ -21,25 +21,27 @@ use std::io::Write;
 use std::path::Path;
 use crate::nodesprint::printer::NodesPrintProcessPrinter;
 use crate::tests::fibo_proc::conf::FiboConfig;
-use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
+use crate::tests::fibo_proc::context::FiboContextAndParameterization;
 use crate::tests::fibo_proc::node::FiboNodeKind;
 
 pub struct FiboProcessNodePrinter {}
 
 impl NodesPrintProcessPrinter<FiboConfig> for FiboProcessNodePrinter {
 
-    fn should_print_node(&self,
-                         _context: &FiboContext,
-                         _param: &FiboParameterization,
-                         _node: &FiboNodeKind) -> bool {
+    fn should_print_node(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _node: &FiboNodeKind
+    ) -> bool {
         true
     }
 
-    fn print_node(&self,
-                  _context: &FiboContext,
-                  _param: &FiboParameterization,
-                  node: &FiboNodeKind,
-                  path: &Path) {
+    fn print_node(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        node: &FiboNodeKind,
+        path: &Path
+    ) {
         let mut file = File::create(path).unwrap();
         let as_string = node.current.to_string();
         let _ = file.write(as_string.as_bytes() );

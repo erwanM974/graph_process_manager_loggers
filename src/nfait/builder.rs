@@ -18,20 +18,22 @@ limitations under the License.
 
 use autour_core::traits::letter::AutLetter;
 
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 
 
 
 pub trait NFAITProcessBuilder<Conf : AbstractProcessConfiguration, Letter : AutLetter> {
 
-    fn step_into_letter(&mut self,
-                          context: &Conf::Context,
-                          param: &Conf::Parameterization,
-                          step : &Conf::StepKind) -> Option<Letter>;
+    fn step_into_letter(
+        &mut self,
+        context_and_param: &Conf::ContextAndParameterization,
+        step : &Conf::DomainSpecificStep
+    ) -> Option<Letter>;
 
-    fn is_node_final(&self,
-                     context: &Conf::Context,
-                     param: &Conf::Parameterization,
-                     node : &Conf::NodeKind) -> bool;
+    fn is_node_final(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        node : &Conf::DomainSpecificNode
+    ) -> bool;
 
 }

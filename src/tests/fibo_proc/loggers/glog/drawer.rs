@@ -16,16 +16,19 @@ limitations under the License.
 
 
 
+use graph_process_manager_core::process::filter::GenericFiltersManager;
+use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
+use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::colors::GraphvizColor;
 use graphviz_dot_builder::item::item::GraphVizGraphItem;
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape};
 use crate::graphviz::process_drawer_trait::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
-use crate::tests::fibo_proc::conf::{FiboConfig, FiboStaticProof};
-use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
+use crate::tests::fibo_proc::conf::FiboConfig;
+use crate::tests::fibo_proc::context::{FiboContextAndParameterization, FiboFiltrationResult, FiboPersistentState};
 use crate::tests::fibo_proc::node::FiboNodeKind;
+use crate::tests::fibo_proc::priorities::FiboPriorities;
 use crate::tests::fibo_proc::step::FiboStepKind;
-use crate::tests::fibo_proc::verdict::local::FiboLocalVerdict;
 
 pub struct FiboProcessDrawer {
     pub temp_folder : String
@@ -40,54 +43,58 @@ impl FiboProcessDrawer {
 
 impl GraphVizProcessDrawer<FiboConfig> for FiboProcessDrawer {
 
-    fn repr_static_analysis(&self) -> bool {
-        false
-    }
-
     fn get_temp_folder(&self) -> &str {
         &self.temp_folder
     }
 
-    fn get_verdict_color(&self,
-                         _local_verdict: &FiboLocalVerdict) -> GraphvizColor {
-        GraphvizColor::black
+    fn get_initial_legend_gvnode_style(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _strategy: &QueueSearchStrategy,
+        _priorities: &GenericProcessPriorities<FiboPriorities>,
+        _filters_manager : &GenericFiltersManager<FiboConfig>,
+        _use_memoization : bool
+    ) -> GraphvizNodeStyle {
+        vec![GraphvizNodeStyleItem::Label("fibo".to_string())]
     }
 
-    fn get_static_analysis_as_gvnode_style(&self,
-                                         _context: &FiboContext,
-                                         _param : &FiboParameterization,
-                                         _verdict: &FiboLocalVerdict,
-                                         _data_proof: &FiboStaticProof,
-    _static_name : &str) -> GraphvizNodeStyle {
-        panic!("should never be called")
+    fn get_final_legend_gvnode_style(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _final_global_state : &FiboPersistentState
+    ) -> GraphvizNodeStyle {
+        vec![]
     }
 
-    fn get_step_gvnode_style(&self,
-                        _context: &FiboContext,
-                        _param : &FiboParameterization,
-                        _step: &FiboStepKind,
-                             _step_name : &str) -> GraphvizNodeStyle {
+    fn get_step_gvnode_style_and_edge_color(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _step: &FiboStepKind,
+        _step_name : &str
+    ) -> (GraphvizNodeStyle,GraphvizColor) {
         let gv_node_options : GraphvizNodeStyle = vec![
             GraphvizNodeStyleItem::Label( "next".to_string() ),
             GraphvizNodeStyleItem::FillColor( GraphvizColor::white ),
             GraphvizNodeStyleItem::Shape(GvNodeShape::Rectangle)];
         // ***
-        gv_node_options
+        (gv_node_options,GraphvizColor::black)
     }
 
-    fn get_node_as_gvcluster_style(&self,
-                                   _context: &FiboContext,
-                                   _param: &FiboParameterization,
-                                   _new_node: &FiboNodeKind,
-                                   _cluster_name : &str) -> (GraphvizNodeStyle, Vec<Box<GraphVizGraphItem>>) {
+    fn get_node_as_gvcluster_style(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _new_node: &FiboNodeKind,
+        _cluster_name : &str
+    ) -> (GraphvizNodeStyle,Vec<Box<GraphVizGraphItem>>) {
         panic!("should never be called")
     }
 
-    fn get_node_as_gvnode_style(&self,
-                                  _context: &FiboContext,
-                                  _param: &FiboParameterization,
-                                  new_node: &FiboNodeKind,
-                                _node_name : &str) -> GraphvizNodeStyle {
+    fn get_node_as_gvnode_style(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        new_node: &FiboNodeKind,
+        _node_name : &str
+    ) -> GraphvizNodeStyle {
         let gv_node_options : GraphvizNodeStyle = vec![
             GraphvizNodeStyleItem::Label( new_node.current.to_string() ),
             GraphvizNodeStyleItem::FillColor( GraphvizColor::white ),
@@ -96,19 +103,34 @@ impl GraphVizProcessDrawer<FiboConfig> for FiboProcessDrawer {
         gv_node_options
     }
 
-    fn get_node_format(&self) -> GraphVizLoggerNodeFormat {
-        GraphVizLoggerNodeFormat::SimpleNode
+    fn get_filtration_result_as_gvnode_style_and_edge_color(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _filtration_result: &FiboFiltrationResult,
+        _filtration_node_name : &str 
+    ) -> (GraphvizNodeStyle,GraphvizColor) {
+        let gv_node_options : GraphvizNodeStyle = vec![
+            GraphvizNodeStyleItem::Label( "Max Number exceeded".to_string() ),
+            GraphvizNodeStyleItem::FillColor( GraphvizColor::burlywood4 ),
+            GraphvizNodeStyleItem::Shape(GvNodeShape::Pentagon)];
+        // ***
+        (gv_node_options,GraphvizColor::burlywood4)
     }
-    
-    fn get_node_phase_id(&self,
-                         _context: &<FiboConfig as graph_process_manager_core::manager::config::AbstractProcessConfiguration>::Context,
-                         _param: &<FiboConfig as graph_process_manager_core::manager::config::AbstractProcessConfiguration>::Parameterization,
-                         _new_node: &<FiboConfig as graph_process_manager_core::manager::config::AbstractProcessConfiguration>::NodeKind) -> Option<u32> {
-        None 
+
+    fn get_node_phase_id(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _new_node: &FiboNodeKind,
+    ) -> Option<u32> {
+        None
     }
     
     fn get_phase_color(&self, _phase_id : u32) -> GraphvizColor {
         GraphvizColor::black
+    }
+
+    fn get_node_format(&self) -> GraphVizLoggerNodeFormat {
+        GraphVizLoggerNodeFormat::SimpleNode
     }
 
 }

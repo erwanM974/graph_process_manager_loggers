@@ -15,6 +15,22 @@ limitations under the License.
 */
 
 
-pub mod global;
-pub mod local;
+
+pub fn get_anchor_id(prefix : &str, id: u32) -> String {
+    format!("{:}_a{:}", prefix, id)
+}
+
+pub fn get_node_id(prefix : &str, id: u32) -> String {
+    format!("{:}_n{:}", prefix, id)
+}
+
+pub fn get_filtration_id(prefix : &str, id: u32) -> String {
+    format!("{:}_f{:}", prefix, id)
+}
+
+pub fn get_step_id(prefix : &str,
+                   origin_id: u32,
+                   target_id: u32) -> String {
+    format!("{:}_s_{:}_{:}", prefix, origin_id, target_id)
+}
 

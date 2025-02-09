@@ -16,7 +16,7 @@ limitations under the License.
 
 
 use std::collections::{HashMap, HashSet};
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
 
 use crate::stepstrace::printer::StepsTraceProcessPrinter;

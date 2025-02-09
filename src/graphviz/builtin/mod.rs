@@ -16,7 +16,7 @@ limitations under the License.
 
 pub mod node_drawer;
 pub mod step_drawer;
-pub mod proof_drawer;
+pub mod filtration_drawer;
 pub mod builtin_process_drawer_trait;
 mod implement;
 

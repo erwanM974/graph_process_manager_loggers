@@ -16,7 +16,7 @@ limitations under the License.
 
 
 use std::fmt;
-use graph_process_manager_core::manager::verdict::AbstractGlobalVerdict;
+use graph_process_manager_core::process::verdict::AbstractGlobalVerdict;
 use crate::tests::tree_proc::verdict::local::TreeLocalVerdict;
 
 

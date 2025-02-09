@@ -16,7 +16,8 @@ limitations under the License.
 
 
 use std::fmt;
-use graph_process_manager_core::delegate::priorities::AbstractPriorities;
+
+use graph_process_manager_core::queue::priorities::AbstractPriorities;
 
 use crate::tests::fibo_proc::step::FiboStepKind;
 

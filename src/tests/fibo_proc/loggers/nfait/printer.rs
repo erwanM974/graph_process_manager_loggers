@@ -21,7 +21,7 @@ use crate::nfait::builder::NFAITProcessBuilder;
 use crate::nfait::logger::NFAITBuilderPrinter;
 
 use crate::tests::fibo_proc::conf::FiboConfig;
-use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
+use crate::tests::fibo_proc::context::FiboContextAndParameterization;
 use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::step::FiboStepKind;
 
@@ -29,17 +29,19 @@ use crate::tests::fibo_proc::step::FiboStepKind;
 
 impl NFAITProcessBuilder<FiboConfig,char> for CharAsLetterPrinter {
 
-    fn step_into_letter(&mut self,
-                        _context: &FiboContext,
-                        _param: &FiboParameterization,
-                        _step: &FiboStepKind) -> Option<char> {
+    fn step_into_letter(
+        &mut self,
+        _context_and_param: &FiboContextAndParameterization,
+        _step: &FiboStepKind
+    ) -> Option<char> {
         Some('n')
     }
 
-    fn is_node_final(&self,
-                     _context: &FiboContext,
-                     _param: &FiboParameterization,
-                     _node: &FiboNodeKind) -> bool {
+    fn is_node_final(
+        &self,
+        _context_and_param: &FiboContextAndParameterization,
+        _node: &FiboNodeKind
+    ) -> bool {
         false
     }
 }

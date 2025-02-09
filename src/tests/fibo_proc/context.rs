@@ -14,15 +14,66 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use graph_process_manager_core::manager::config::AbstractProcessParameterization;
+use graph_process_manager_core::process::{config::AbstractContextAndParameterization, persistent_state::AbstractProcessMutablePersistentState};
+
+use super::{conf::FiboConfig, node::FiboNodeKind, step::FiboStepKind};
 
 
-pub struct FiboContext {}
+pub enum FiboFiltrationResult {
+    MaxNumberExceeded
+}
+pub struct FiboContextAndParameterization {}
 
-pub struct FiboParameterization {}
 
-impl AbstractProcessParameterization for FiboParameterization {
-    fn get_param_as_strings(&self) -> Vec<String> {
-        vec!["process = Fibonacci".to_string()]
+impl AbstractContextAndParameterization for FiboContextAndParameterization {
+    fn get_process_description(&self) -> &str {
+        "Fibonacci"
+    }
+    fn get_parameters_description(&self) -> Vec<&str> {
+        vec![]
+    }
+}
+
+
+pub struct FiboPersistentState {}
+
+impl AbstractProcessMutablePersistentState<FiboConfig> for FiboPersistentState {
+    fn get_initial_state(
+        _context_and_param : &FiboContextAndParameterization
+    ) -> Self {
+        FiboPersistentState {}
+    }
+
+    fn update_on_node_reached(
+        &mut self, 
+        _context_and_param : &FiboContextAndParameterization,
+        _node : &FiboNodeKind
+    ) {
+        // nothing
+    }
+
+    fn update_on_next_steps_collected_reached(
+        &mut self, 
+        _context_and_param : &FiboContextAndParameterization,
+        _node : &FiboNodeKind,
+        _steps : &[FiboStepKind]
+    ) {
+        // nothing
+    }
+
+    fn update_on_filtered(
+        &mut self,
+        _context_and_param : &FiboContextAndParameterization,
+        _parent_node : &FiboNodeKind,
+        _filtration_result : &<FiboConfig as graph_process_manager_core::process::config::AbstractProcessConfiguration>::FiltrationResult
+    ) {
+        // nothing
+    }
+
+    fn warrants_termination_of_the_process(
+        &self, 
+        _context_and_param : &FiboContextAndParameterization
+    ) -> bool {
+        false 
     }
 }

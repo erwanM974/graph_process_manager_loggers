@@ -18,7 +18,7 @@ pub mod logger;
 mod implem;
 pub mod process_drawer_trait;
 pub mod format;
-
+pub(crate) mod util;
 
 pub mod builtin;
 

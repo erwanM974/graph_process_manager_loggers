@@ -17,7 +17,7 @@ limitations under the License.
 
 
 
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use crate::tests::tree_of_trees_proc::context::{TreeOfTreesContext, TreeOfTreesParameterization};
 use crate::tests::tree_of_trees_proc::filter::elim::TreeOfTreesFilterEliminationKind;
 use crate::tests::tree_of_trees_proc::filter::filter::TreeOfTreesFilterCriterion;

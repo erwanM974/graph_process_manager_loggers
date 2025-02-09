@@ -17,20 +17,22 @@ limitations under the License.
 
 
 use std::path::Path;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 
 
 pub trait NodesPrintProcessPrinter<Conf : AbstractProcessConfiguration> {
 
-    fn should_print_node(&self,
-                      context: &Conf::Context,
-                      param: &Conf::Parameterization,
-                      node: &Conf::NodeKind) -> bool;
+    fn should_print_node(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        node: &Conf::DomainSpecificNode
+    ) -> bool;
 
-    fn print_node(&self,
-                  context: &Conf::Context,
-                  param: &Conf::Parameterization,
-                  node: &Conf::NodeKind,
-                  path : &Path);
+    fn print_node(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        node: &Conf::DomainSpecificNode,
+        path : &Path
+    );
 
 }

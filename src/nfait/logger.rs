@@ -20,7 +20,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use autour_core::nfait::nfait::AutNFAIT;
 use autour_core::traits::letter::AutLetter;
 use autour_core::traits::repr::AbstractLanguagePrinter;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
 use crate::nfait::builder::NFAITProcessBuilder;

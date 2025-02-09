@@ -18,11 +18,10 @@ use std::any::Any;
 use autour_core::traits::letter::AutLetter;
 use autour_core::traits::repr::AutGraphvizDrawable;
 
-use graph_process_manager_core::manager::logger::AbstractProcessLogger;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
-use graph_process_manager_core::queued_steps::queue::strategy::QueueSearchStrategy;
-use graph_process_manager_core::handler::filter::AbstractFilter;
-use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
+use graph_process_manager_core::process::{filter::GenericFiltersManager, logger::AbstractProcessLogger};
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
+use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
+use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::traits::DotPrintable;
 
 use crate::nfait::logger::{GenericNFAITLogger, NFAITBuilderPrinter};
@@ -42,53 +41,44 @@ impl<Conf, Letter,BP>
         self
     }
 
-    fn log_initialize(&mut self) {
+    fn log_initialize(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _strategy : &QueueSearchStrategy,
+        _priorities : &GenericProcessPriorities<Conf::Priorities>,
+        _filters_manager : &GenericFiltersManager<Conf>,
+        _initial_global_state : &Conf::MutablePersistentState,
+        _use_memoization : bool,
+    ) {
         // nothing
     }
 
-    fn log_parameterization(&mut self,
-                            _strategy: &QueueSearchStrategy,
-                            _priorities: &GenericProcessPriorities<Conf::Priorities>,
-                            _filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
-                            _goal : &Option<Conf::GlobalVerdict>,
-                            _memoize : bool,
-                            _parameterization: &Conf::Parameterization) {
-        // nothing
-    }
-
-    fn log_filtered(&mut self,
-                    _context: &Conf::Context,
-                    _parent_state_id: u32,
-                    _new_state_id: u32,
-                    _elim_kind: &Conf::FilterEliminationKind) {
-        // nothing
-    }
-
-    fn log_new_node(&mut self,
-                    context: &Conf::Context,
-                    param: &Conf::Parameterization,
-                    new_node_id: u32,
-                    new_node: &Conf::NodeKind) {
+    fn log_new_node(
+        &mut self,
+        context_and_param : &Conf::ContextAndParameterization,
+        new_node_id : u32,
+        new_node : &Conf::DomainSpecificNode
+    ) {
         let nfa_state_id = self.next_nfa_state_id;
         self.next_nfa_state_id += 1;
         self.explo_node_id_to_nfa_state_id_map.insert(new_node_id,nfa_state_id);
         // ***
-        if self.builder_printer.is_node_final(context,param,new_node) {
+        if self.builder_printer.is_node_final(context_and_param,new_node) {
             self.finals.insert(nfa_state_id);
         }
     }
 
-    fn log_new_step(&mut self,
-                    context: &Conf::Context,
-                    param: &Conf::Parameterization,
-                    origin_node_id: u32,
-                    target_node_id: u32,
-                    step: &Conf::StepKind,
-                    _target_node : &Conf::NodeKind,
-                    _target_depth : u32) {
+    fn log_new_step(
+        &mut self,
+        context_and_param : &Conf::ContextAndParameterization,
+        origin_node_id : u32,
+        step : &Conf::DomainSpecificStep,
+        target_node_id : u32,
+        _target_node : &Conf::DomainSpecificNode
+    ) {
         let nfa_orig_state_id = *self.explo_node_id_to_nfa_state_id_map.get(&origin_node_id).unwrap();
         let nfa_targ_state_id = *self.explo_node_id_to_nfa_state_id_map.get(&target_node_id).unwrap();
-        match self.builder_printer.step_into_letter(context,param,step) {
+        match self.builder_printer.step_into_letter(context_and_param,step) {
             None => {
                 match self.epsilon_trans.get_mut(&nfa_orig_state_id) {
                     None => {
@@ -122,25 +112,37 @@ impl<Conf, Letter,BP>
         }
     }
 
-    fn log_verdict_on_no_child(&mut self,
-                               _context: &Conf::Context,
-                               _param: &Conf::Parameterization,
-                               _parent_state_id: u32,
-                               _verdict: &Conf::LocalVerdict) {
+    fn log_notify_last_child_step_of_node_processed(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _parent_node_id : u32
+    ) {
         // nothing
     }
 
-    fn log_verdict_on_static_analysis(&mut self,
-                                      _context: &Conf::Context,
-                                      _param: &Conf::Parameterization,
-                                      _parent_state_id: u32,
-                                      _verdict: &Conf::LocalVerdict,
-                                      _proof : &Conf::StaticLocalVerdictAnalysisProof) {
+    fn log_notify_node_without_children(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _node_id : u32
+    ) {
         // nothing
     }
 
-    fn log_terminate(&mut self,
-                     _global_verdict: &Conf::GlobalVerdict) {
+    fn log_filtered(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _parent_node_id : u32,
+        _filtration_result_id : u32,
+        _filtration_result : &Conf::FiltrationResult
+    ) {
+        // nothing
+    }
+
+    fn log_terminate_process(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _global_state : &Conf::MutablePersistentState
+    ) {
         let got_nfait = self.get_nfait();
         match &self.draw {
             None => {},
@@ -155,15 +157,4 @@ impl<Conf, Letter,BP>
         }
     }
 
-    fn log_notify_terminal_node_reached(&mut self,
-                                        _context: &Conf::Context,
-                                        _node_id: u32) {
-        // nothing
-    }
-
-    fn log_notify_last_child_of_node_processed(&mut self,
-                                               _context: &Conf::Context,
-                                               _parent_node_id: u32) {
-        // nothing
-    }
 }

@@ -17,33 +17,36 @@ limitations under the License.
 
 
 use std::path::Path;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 
 use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
 
 
 pub trait StepsTraceProcessPrinter<Conf : AbstractProcessConfiguration, ObjectToBuild : ObjectToBuildWhenTracingSteps> {
 
-    fn get_initial_object(&self,
-                          context: &Conf::Context,
-                          param: &Conf::Parameterization,
-                          node: &Conf::NodeKind) -> ObjectToBuild;
+    fn get_initial_object(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        node: &Conf::DomainSpecificNode
+    ) -> ObjectToBuild;
 
-    fn add_step_to_object(&self,
-                          context: &Conf::Context,
-                          param: &Conf::Parameterization,
-                          object : &ObjectToBuild,
-                          step : &Conf::StepKind) -> ObjectToBuild;
+    fn add_step_to_object(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        object : &ObjectToBuild,
+        step : &Conf::DomainSpecificStep
+    ) -> ObjectToBuild;
 
-    fn should_print_on_node_reached(&self,
-                                    context: &Conf::Context,
-                                    param: &Conf::Parameterization,
-                                    node: &Conf::NodeKind,
-                                    node_depth : u32) -> bool;
+    fn should_print_on_node_reached(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        node: &Conf::DomainSpecificNode
+    ) -> bool;
 
-    fn print_object(&self,
-                    context: &Conf::Context,
-                    param: &Conf::Parameterization,
-                    object : &ObjectToBuild,
-                    path : &Path);
+    fn print_object(
+        &self,
+        context_and_param: &Conf::ContextAndParameterization,
+        object : &ObjectToBuild,
+        path : &Path
+    );
 }

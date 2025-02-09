@@ -16,21 +16,38 @@ limitations under the License.
 
 use std::path::Path;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
-use graphviz_dot_builder::colors::GraphvizColor;
+use graphviz_dot_builder::{colors::GraphvizColor, item::node::style::GvNodeShape};
 
-pub trait CustomStepDrawerForGraphvizLogger<Conf : AbstractProcessConfiguration> {
 
-    fn draw(
+/** 
+ * Draw the filtration result:
+ * - either as a Graphviz Node with:
+ *   + a specific shape
+ *   + a label
+ *   + a fill color
+ *   + a font size
+ *   + a font name
+ *   + a font color
+ * - or as a custom image
+ * **/
+pub enum FiltrationResultStyle {
+    ShapeAndLabel(GvNodeShape,String,GraphvizColor,u32,&'static str,GraphvizColor),
+    CustomImage
+}
+
+pub trait FiltrationDrawerForGraphvizLogger<Conf : AbstractProcessConfiguration> {
+
+    fn get_filter_node_inner_style_and_draw_if_needed(
         &self,
         context_and_param : &Conf::ContextAndParameterization,
-        step : &Conf::DomainSpecificStep,
-        full_path : &Path
-    );
+        filtration_result: &Conf::FiltrationResult,
+        image_file_path : &Path
+    ) -> FiltrationResultStyle;
 
-    fn get_step_color(
+    fn get_filter_edge_color(
         &self,
         context_and_param : &Conf::ContextAndParameterization,
-        step : &Conf::DomainSpecificStep,
+        filtration_result: &Conf::FiltrationResult,
     ) -> GraphvizColor;
 
 }

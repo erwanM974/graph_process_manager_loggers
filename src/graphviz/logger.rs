@@ -17,7 +17,7 @@ limitations under the License.
 
 use std::collections::HashMap;
 use graphviz_dot_builder::graph::graph::GraphVizDiGraph;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 use graphviz_dot_builder::graph::style::{GraphvizGraphStyleItem,GvGraphRankDir};
 use graphviz_dot_builder::item::cluster::GraphVizCluster;
@@ -39,7 +39,7 @@ pub struct GenericGraphVizLogger<Conf : AbstractProcessConfiguration> {
     pub(crate) output_file_name : String,
     // ***
     /** the Graphviz graph that is being built **/
-    pub(crate) graph : GraphVizDiGraph, 
+    pub graph : GraphVizDiGraph, 
     // ***
     /**
     A map that keeps track of the phase as part of which a given node has been processed

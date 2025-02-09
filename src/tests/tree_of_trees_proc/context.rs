@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use graph_process_manager_core::manager::config::AbstractProcessParameterization;
+use graph_process_manager_core::process::config::AbstractProcessParameterization;
 
 
 pub struct TreeOfTreesContext {}

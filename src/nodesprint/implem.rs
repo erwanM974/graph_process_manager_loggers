@@ -20,11 +20,11 @@ use std::any::Any;
 use std::fs;
 use std::path::PathBuf;
 
-use graph_process_manager_core::manager::logger::AbstractProcessLogger;
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
-use graph_process_manager_core::queued_steps::queue::strategy::QueueSearchStrategy;
-use graph_process_manager_core::handler::filter::AbstractFilter;
-use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
+use graph_process_manager_core::process::filter::GenericFiltersManager;
+use graph_process_manager_core::process::logger::AbstractProcessLogger;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
+use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
+use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 
 use crate::nodesprint::logger::GenericNodesPrintLogger;
 
@@ -36,88 +36,80 @@ impl<Conf : AbstractProcessConfiguration+ 'static>
         self
     }
 
-    fn log_initialize(&mut self) {
+    fn log_initialize(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _strategy : &QueueSearchStrategy,
+        _priorities : &GenericProcessPriorities<Conf::Priorities>,
+        _filters_manager : &GenericFiltersManager<Conf>,
+        _initial_global_state : &Conf::MutablePersistentState,
+        _use_memoization : bool
+    ) {
         // empties nodesprint directory if exists
         let _ = fs::remove_dir_all(&self.parent_folder);
         // creates nodesprint directory
         let _ = fs::create_dir_all(&self.parent_folder);
     }
 
-    fn log_parameterization(&mut self,
-                            _strategy: &QueueSearchStrategy,
-                            _priorities: &GenericProcessPriorities<Conf::Priorities>,
-                            _filters: &[Box<dyn AbstractFilter<Conf::FilterCriterion, Conf::FilterEliminationKind>>],
-                            _goal : &Option<Conf::GlobalVerdict>,
-                            _memoize : bool,
-                            _parameterization: &Conf::Parameterization) {
-        // nothing
-    }
-
-    fn log_filtered(&mut self,
-                    _context: &Conf::Context,
-                    _parent_state_id: u32,
-                    _new_state_id: u32,
-                    _elim_kind: &Conf::FilterEliminationKind) {
-        // nothing
-    }
-
-    fn log_new_node(&mut self,
-                    context: &Conf::Context,
-                    param: &Conf::Parameterization,
-                    new_state_id: u32,
-                    new_node: &Conf::NodeKind) {
-        if self.printer.should_print_node(context, param, new_node) {
+    fn log_new_node(
+        &mut self,
+        context_and_param : &Conf::ContextAndParameterization,
+        new_node_id : u32,
+        new_node : &Conf::DomainSpecificNode
+    ) {
+        if self.printer.should_print_node(context_and_param, new_node) {
             let file_name = format!("{:}_node{:}.{:}",
                                     self.prefix,
-                                    new_state_id,
+                                    new_node_id,
                                     self.file_extension);
             let path_buf : PathBuf = [&self.parent_folder, &file_name].iter().collect();
-            self.printer.print_node(context, param, new_node, path_buf.as_path());
+            self.printer.print_node(context_and_param, new_node, path_buf.as_path());
         }
     }
 
-    fn log_new_step(&mut self,
-                    _context: &Conf::Context,
-                    _param: &Conf::Parameterization,
-                    _origin_state_id: u32,
-                    _target_state_id: u32,
-                    _step: &Conf::StepKind,
-                    _target_node : &Conf::NodeKind,
-                    _target_depth : u32) {
+    fn log_new_step(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _origin_node_id : u32,
+        _step : &Conf::DomainSpecificStep,
+        _target_node_id : u32,
+        _target_node : &Conf::DomainSpecificNode
+    ) {
         // nothing
     }
 
-    fn log_verdict_on_no_child(&mut self,
-                               _context: &Conf::Context,
-                               _param: &Conf::Parameterization,
-                               _parent_state_id: u32,
-                               _verdict: &Conf::LocalVerdict) {
+    fn log_notify_last_child_step_of_node_processed(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _parent_node_id : u32
+    ) {
         // nothing
     }
 
-    fn log_verdict_on_static_analysis(&mut self,
-                                      _context: &Conf::Context,
-                                      _param: &Conf::Parameterization,
-                                      _parent_state_id: u32,
-                                      _verdict: &Conf::LocalVerdict,
-                                      _data : &Conf::StaticLocalVerdictAnalysisProof) {
+    fn log_notify_node_without_children(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _node_id : u32
+    ) {
         // nothing
     }
 
-    fn log_terminate(&mut self,
-                     _global_verdict: &Conf::GlobalVerdict) {
+    fn log_filtered(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _parent_node_id : u32,
+        _filtration_result_id : u32,
+        _filtration_result : &Conf::FiltrationResult
+    ) {
         // nothing
     }
 
-    fn log_notify_terminal_node_reached(&mut self,
-                                        _context: &Conf::Context,
-                                        _node_id: u32) {
+    fn log_terminate_process(
+        &mut self,
+        _context_and_param : &Conf::ContextAndParameterization,
+        _global_state : &Conf::MutablePersistentState
+    ) {
         // nothing
     }
 
-    fn log_notify_last_child_of_node_processed(&mut self,
-                                               _context: &Conf::Context,
-                                               _parent_node_id: u32) {
-        // nothing
-    }
 }

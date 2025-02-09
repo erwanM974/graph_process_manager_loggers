@@ -17,32 +17,28 @@ limitations under the License.
 
 
 
-use graph_process_manager_core::manager::config::AbstractProcessConfiguration;
-use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
-use crate::tests::fibo_proc::filter::elim::FiboFilterEliminationKind;
-use crate::tests::fibo_proc::filter::filter::FiboFilterCriterion;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use crate::tests::fibo_proc::handler::FiboProcessHandler;
 use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::priorities::FiboPriorities;
 use crate::tests::fibo_proc::step::FiboStepKind;
-use crate::tests::fibo_proc::verdict::global::FiboGlobalVerdict;
-use crate::tests::fibo_proc::verdict::local::FiboLocalVerdict;
+
+use super::context::{FiboContextAndParameterization, FiboFiltrationResult, FiboPersistentState};
 
 pub struct FiboConfig {}
 
-pub struct FiboStaticProof {}
 
 impl AbstractProcessConfiguration for FiboConfig {
-    type Context = FiboContext;
-    type Parameterization = FiboParameterization;
-    type NodeKind = FiboNodeKind;
-    type StepKind = FiboStepKind;
+    // ***
+    type ContextAndParameterization = FiboContextAndParameterization;
+    type AlgorithmOperationHandler = FiboProcessHandler;
+    // ***
+    type DomainSpecificNode = FiboNodeKind;
+    type DomainSpecificStep = FiboStepKind;
     type Priorities = FiboPriorities;
-    type FilterCriterion = FiboFilterCriterion;
-    type FilterEliminationKind = FiboFilterEliminationKind;
-    type LocalVerdict = FiboLocalVerdict;
-    type StaticLocalVerdictAnalysisProof = FiboStaticProof;
-    type GlobalVerdict = FiboGlobalVerdict;
-    type ProcessHandler = FiboProcessHandler;
+    // ***
+    type MutablePersistentState = FiboPersistentState;
+    // ***
+    type FiltrationResult = FiboFiltrationResult;
 }
 

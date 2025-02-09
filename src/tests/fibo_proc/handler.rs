@@ -16,67 +16,38 @@ limitations under the License.
 
 
 
-use graph_process_manager_core::delegate::node::GenericNode;
-use graph_process_manager_core::handler::handler::AbstractProcessHandler;
-use graph_process_manager_core::queued_steps::step::GenericStep;
-use crate::tests::fibo_proc::conf::{FiboConfig, FiboStaticProof};
-use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
-use crate::tests::fibo_proc::filter::filter::FiboFilterCriterion;
+use graph_process_manager_core::process::handler::AbstractAlgorithmOperationHandler;
+
+use crate::tests::fibo_proc::conf::FiboConfig;
 use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::step::FiboStepKind;
-use crate::tests::fibo_proc::verdict::local::FiboLocalVerdict;
+
+use super::context::FiboContextAndParameterization;
 
 
 pub struct FiboProcessHandler {}
 
-impl AbstractProcessHandler<FiboConfig> for FiboProcessHandler {
+impl AbstractAlgorithmOperationHandler<FiboConfig> for FiboProcessHandler {
 
-    fn process_new_step(_context: &FiboContext,
-                        _param : &FiboParameterization,
-                        parent_node: &GenericNode<FiboNodeKind>,
-                        step_to_process: &GenericStep<FiboStepKind>,
-                        _new_node_id: u32,
-                        _node_counter: u32) -> FiboNodeKind {
-        match &step_to_process.kind {
+    fn process_new_step(
+        _context_and_param : &FiboContextAndParameterization,
+        parent_node : &FiboNodeKind,
+        step_to_process : &FiboStepKind
+    ) -> FiboNodeKind {
+        match &step_to_process {
             FiboStepKind::Next => {
-                let new_current = parent_node.kind.next;
-                let new_next = parent_node.kind.current + parent_node.kind.next;
+                let new_current = parent_node.next;
+                let new_next = parent_node.current + parent_node.next;
                 FiboNodeKind::new(new_current,new_next)
             }
         }
     }
 
-    fn get_criterion(_context: &FiboContext,
-                     _param : &FiboParameterization,
-                     _parent_node: &GenericNode<FiboNodeKind>,
-                     _step_to_process: &GenericStep<FiboStepKind>,
-                     _new_node_id: u32,
-                     _node_counter: u32) -> FiboFilterCriterion {
-        FiboFilterCriterion{}
-    }
-
-    fn collect_next_steps(_context: &FiboContext,
-                          _param : &FiboParameterization,
-                          _parent_node_kind: &FiboNodeKind)
-                -> Vec<FiboStepKind> {
+    fn collect_next_steps(
+        _context_and_param : &FiboContextAndParameterization,
+        _parent_node : &FiboNodeKind
+    ) -> Vec<FiboStepKind> {
         vec![FiboStepKind::Next]
     }
 
-    fn get_local_verdict_when_no_child(_context: &FiboContext,
-                                       _param: &FiboParameterization,
-                                       _node_kind: &FiboNodeKind) -> FiboLocalVerdict {
-        FiboLocalVerdict{}
-    }
-
-    fn get_local_verdict_from_static_analysis(_context: &FiboContext,
-                                              _param: &FiboParameterization,
-                                              _node_kind: &mut FiboNodeKind) -> Option<(FiboLocalVerdict, FiboStaticProof)> {
-        None
-    }
-
-    fn pursue_process_after_static_verdict(_context: &FiboContext,
-                                           _param: &FiboParameterization,
-                                           _loc_verd: &FiboLocalVerdict) -> bool {
-        true
-    }
 }

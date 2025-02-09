@@ -17,10 +17,10 @@ limitations under the License.
 
 use std::path::PathBuf;
 use autour_core::printers::p_chars::CharAsLetterPrinter;
-use graph_process_manager_core::delegate::delegate::GenericProcessDelegate;
-use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
-use graph_process_manager_core::manager::manager::GenericProcessManager;
-use graph_process_manager_core::queued_steps::queue::strategy::QueueSearchStrategy;
+use graph_process_manager_core::process::filter::GenericFiltersManager;
+use graph_process_manager_core::process::manager::GenericProcessManager;
+use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
+use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
@@ -29,15 +29,15 @@ use crate::nfait::logger::GenericNFAITLogger;
 use crate::nodesprint::logger::GenericNodesPrintLogger;
 use crate::stepstrace::logger::GenericStepsTraceLogger;
 use crate::tests::fibo_proc::conf::FiboConfig;
-use crate::tests::fibo_proc::context::{FiboContext, FiboParameterization};
-use crate::tests::fibo_proc::filter::filter::FiboFilter;
 use crate::tests::fibo_proc::loggers::glog::drawer::FiboProcessDrawer;
 use crate::tests::fibo_proc::loggers::nlog::printer::FiboProcessNodePrinter;
 use crate::tests::fibo_proc::loggers::slog::object::FiboStepsTrace;
 use crate::tests::fibo_proc::loggers::slog::printer::FiboProcessStepPrinter;
 use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::priorities::FiboPriorities;
-use crate::tests::fibo_proc::step::FiboStepKind;
+
+use super::fibo_proc::context::FiboContextAndParameterization;
+use super::fibo_proc::filter::FiboFilter;
 
 #[test]
 fn process_fibo() {
@@ -76,20 +76,24 @@ fn process_fibo() {
 
     let init_node = FiboNodeKind::new(0,1);
 
-    let process_ctx = FiboContext{};
+    let process_ctx = FiboContextAndParameterization{};
     let priorities : GenericProcessPriorities<FiboPriorities> = GenericProcessPriorities::new(FiboPriorities{},false);
-    let delegate : GenericProcessDelegate<FiboStepKind,FiboNodeKind,FiboPriorities> = GenericProcessDelegate::new(QueueSearchStrategy::HCS,
-                                                                                                                  priorities);
-    let mut manager : GenericProcessManager<FiboConfig> = GenericProcessManager::new(process_ctx,
-                                                                                              FiboParameterization{},
-                                                                                              delegate,
-                                                                                              vec![Box::new(FiboFilter::MaxProcessDepth(10))],
-                                                                                              vec![Box::new(graphic_logger),
-                                                                                                   Box::new(node_logger),
-                                                                                                   Box::new(steps_logger),
-                                                                                                   Box::new(nfait_logger)],
-                                                                                              None,
-                                                                                              false);
+    let filters_manager = GenericFiltersManager::new(
+        vec![Box::new(FiboFilter::MaxNum(10))], 
+        vec![], 
+        vec![]
+    );
+    let mut manager : GenericProcessManager<FiboConfig> = GenericProcessManager::new(
+        process_ctx,
+        QueueSearchStrategy::DFS,
+        priorities,
+        filters_manager,
+        vec![Box::new(graphic_logger),
+            Box::new(node_logger),
+            Box::new(steps_logger),
+            Box::new(nfait_logger)],
+        false
+    );
 
-    let (_, _) = manager.start_process(init_node);
+    manager.start_process(init_node);
 }

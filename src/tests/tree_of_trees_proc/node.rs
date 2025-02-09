@@ -19,7 +19,7 @@ limitations under the License.
 
 use std::hash::Hash;
 
-use graph_process_manager_core::manager::config::AbstractNodeKind;
+use graph_process_manager_core::process::config::AbstractNodeKind;
 
 
 #[derive(Clone, PartialEq, Debug, Eq, Hash)]
