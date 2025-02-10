@@ -23,7 +23,9 @@ use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::priorities::FiboPriorities;
 use crate::tests::fibo_proc::step::FiboStepKind;
 
-use super::context::{FiboContextAndParameterization, FiboFiltrationResult, FiboPersistentState};
+use super::context::FiboContextAndParameterization;
+use super::filtration::FiboFiltrationResult;
+use super::state::FiboPersistentState;
 
 pub struct FiboConfig {}
 

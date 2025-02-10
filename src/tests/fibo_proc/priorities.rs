@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 
-use std::fmt;
 
 use graph_process_manager_core::queue::priorities::AbstractPriorities;
 
@@ -23,15 +22,15 @@ use crate::tests::fibo_proc::step::FiboStepKind;
 
 pub struct FiboPriorities {}
 
-impl fmt::Display for FiboPriorities {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"[]")
-    }
-}
+
 
 impl AbstractPriorities<FiboStepKind> for FiboPriorities {
     fn get_priority_of_step(&self,
                             _step: &FiboStepKind) -> i32 {
         0
+    }
+    
+    fn get_description(&self) -> Vec<String> {
+        vec![]
     }
 }

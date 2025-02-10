@@ -17,13 +17,20 @@ limitations under the License.
 
 use std::fmt;
 
-pub struct TreeLocalVerdict{}
-
-impl fmt::Display for TreeLocalVerdict {
-
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f,"")
-    }
-
+pub enum TreeFiltrationResult {
+    MaxProcessDepth,
+    MaxNodeNumber
 }
 
+impl fmt::Display for TreeFiltrationResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TreeFiltrationResult::MaxProcessDepth => {
+                write!(f,"MaxDepth")
+            },
+            TreeFiltrationResult::MaxNodeNumber => {
+                write!(f,"MaxNum")
+            }
+        }
+    }
+}

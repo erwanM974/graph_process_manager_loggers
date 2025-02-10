@@ -17,22 +17,22 @@ limitations under the License.
 
 use std::path::PathBuf;
 
-use graph_process_manager_core::delegate::delegate::GenericProcessDelegate;
-use graph_process_manager_core::delegate::priorities::GenericProcessPriorities;
+use graph_process_manager_core::process::filter::GenericFiltersManager;
 use graph_process_manager_core::process::manager::GenericProcessManager;
-use graph_process_manager_core::queued_steps::queue::strategy::QueueSearchStrategy;
+use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
+use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
 use crate::graphviz::logger::GenericGraphVizLogger;
 
 use crate::tests::tree_proc::conf::TreeConfig;
-use crate::tests::tree_proc::context::{TreeContext, TreeParameterization};
-use crate::tests::tree_proc::filter::filter::TreeFilter;
 use crate::tests::tree_proc::loggers::glog::drawer::TreeProcessDrawer;
 use crate::tests::tree_proc::node::TreeNodeKind;
 use crate::tests::tree_proc::priorities::TreePriorities;
-use crate::tests::tree_proc::step::TreeStepKind;
+
+use super::tree_proc::context::TreeContextAndParameterization;
+use super::tree_proc::filter::{TreeNodePreFilter, TreeStepFilter};
 
 #[test]
 fn process_tree() {
@@ -70,19 +70,30 @@ fn explo_tree(tree_buf : PathBuf, temp_buf : PathBuf, name : String, queue_strat
 
     let init_node = TreeNodeKind::new("O".to_string());
 
-    let process_ctx = TreeContext{};
+    let process_ctx = TreeContextAndParameterization{};
     let priorities : GenericProcessPriorities<TreePriorities> =
-        GenericProcessPriorities::new(TreePriorities{},false);
-    let delegate : GenericProcessDelegate<TreeStepKind,TreeNodeKind,TreePriorities> =
-        GenericProcessDelegate::new(queue_strategy,priorities);
+        GenericProcessPriorities::new(
+            TreePriorities{},
+            false
+        );
+    let filters_manager = GenericFiltersManager::new(
+        vec![
+            Box::new(TreeNodePreFilter::MaxProcessDepth(4)),
+            ], 
+        vec![], 
+        vec![
+            Box::new(TreeStepFilter::MaxNodeNumber(8))
+        ]
+    );
     let mut manager : GenericProcessManager<TreeConfig> =
-        GenericProcessManager::new(process_ctx,
-                                   TreeParameterization{},
-                                   delegate,
-                                   vec![Box::new(TreeFilter::MaxProcessDepth(4)),Box::new(TreeFilter::MaxNodeNumber(8))],
-                                   vec![Box::new(graphic_logger)],
-                                   None,
-                                   memoize);
+        GenericProcessManager::new(
+            process_ctx,
+            queue_strategy,
+            priorities,
+            filters_manager,
+            vec![Box::new(graphic_logger)],
+            memoize
+        );
 
-    let (_, _) = manager.start_process(init_node);
+    manager.start_process(init_node);
 }

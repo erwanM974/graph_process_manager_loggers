@@ -16,7 +16,8 @@ limitations under the License.
 
 
 use std::fmt;
-use graph_process_manager_core::delegate::priorities::AbstractPriorities;
+
+use graph_process_manager_core::queue::priorities::AbstractPriorities;
 
 use crate::tests::tree_proc::step::TreeStepKind;
 
@@ -32,5 +33,9 @@ impl AbstractPriorities<TreeStepKind> for TreePriorities {
     fn get_priority_of_step(&self,
                             _step: &TreeStepKind) -> i32 {
         0
+    }
+    
+    fn get_description(&self) -> Vec<String> {
+        vec![]
     }
 }

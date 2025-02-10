@@ -16,18 +16,16 @@ limitations under the License.
 
 
 
-use graph_process_manager_core::process::filter::GenericFiltersManager;
-use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
-use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::colors::GraphvizColor;
 use graphviz_dot_builder::item::item::GraphVizGraphItem;
-use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape};
+use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape, GvNodeStyleKind};
 use crate::graphviz::process_drawer_trait::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
 use crate::tests::fibo_proc::conf::FiboConfig;
-use crate::tests::fibo_proc::context::{FiboContextAndParameterization, FiboFiltrationResult, FiboPersistentState};
+use crate::tests::fibo_proc::context::FiboContextAndParameterization;
+use crate::tests::fibo_proc::filtration::FiboFiltrationResult;
 use crate::tests::fibo_proc::node::FiboNodeKind;
-use crate::tests::fibo_proc::priorities::FiboPriorities;
+use crate::tests::fibo_proc::state::FiboPersistentState;
 use crate::tests::fibo_proc::step::FiboStepKind;
 
 pub struct FiboProcessDrawer {
@@ -47,23 +45,15 @@ impl GraphVizProcessDrawer<FiboConfig> for FiboProcessDrawer {
         &self.temp_folder
     }
 
-    fn get_initial_legend_gvnode_style(
-        &self,
-        _context_and_param: &FiboContextAndParameterization,
-        _strategy: &QueueSearchStrategy,
-        _priorities: &GenericProcessPriorities<FiboPriorities>,
-        _filters_manager : &GenericFiltersManager<FiboConfig>,
-        _use_memoization : bool
-    ) -> GraphvizNodeStyle {
-        vec![GraphvizNodeStyleItem::Label("fibo".to_string())]
-    }
-
     fn get_final_legend_gvnode_style(
         &self,
         _context_and_param: &FiboContextAndParameterization,
         _final_global_state : &FiboPersistentState
     ) -> GraphvizNodeStyle {
-        vec![]
+        vec![
+            GraphvizNodeStyleItem::Label("".to_string()),
+            GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Invis])
+        ]
     }
 
     fn get_step_gvnode_style_and_edge_color(

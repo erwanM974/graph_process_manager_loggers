@@ -15,6 +15,6 @@ limitations under the License.
 */
 
 
-pub mod global;
-pub mod local;
-
+pub enum FiboFiltrationResult {
+    MaxNumberExceeded
+}

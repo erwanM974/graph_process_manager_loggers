@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use graph_process_manager_core::process::config::{AbstractContextAndParameterization, AbstractProcessConfiguration};
-use graph_process_manager_core::process::filter::GenericFiltersManager;
-use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
-use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
+use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 
 use crate::graphviz::builtin::builtin_process_drawer_trait::BuiltinProcessDrawer;
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
@@ -40,47 +37,6 @@ where
 
     fn get_temp_folder(&self) -> &str {
         self.get_temp_folder()
-    }
-
-    fn get_initial_legend_gvnode_style(
-        &self,
-        context_and_param: &Conf::ContextAndParameterization,
-        strategy: &QueueSearchStrategy,
-        priorities: &GenericProcessPriorities<Conf::Priorities>,
-        filters_manager : &GenericFiltersManager<Conf>,
-        use_memoization : bool
-    ) -> GraphvizNodeStyle {
-        let mut label_lines : Vec<String> = Vec::new();
-        label_lines.push(context_and_param.get_process_description().to_owned());
-        // ***
-        for param_dsc in context_and_param.get_parameters_description() {
-            label_lines.push( format!(" {};", param_dsc) );
-        }
-        // ***
-        label_lines.push( format!(" strategy={};", strategy) );
-        label_lines.push( format!(" priorities={};", priorities) );
-        label_lines.push( format!(" memoize={}:", use_memoization) );
-        {
-            label_lines.push( " filters=[".to_string() );
-            for filter in filters_manager.get_step_filters() {
-                label_lines.push( format!("            {},", filter.get_filter_description()) );
-            }
-            for filter in filters_manager.get_node_pre_filters() {
-                label_lines.push( format!("            {},", filter.get_filter_description()) );
-            }
-            for filter in filters_manager.get_node_post_filters() {
-                label_lines.push( format!("            {},", filter.get_filter_description()) );
-            }
-            label_lines.push( " ];".to_string() );
-        }
-        // ***
-        let legend_node_gv_options : GraphvizNodeStyle = vec![
-            GraphvizNodeStyleItem::Label( label_lines.join(r"\l") + r"\l" ),
-            GraphvizNodeStyleItem::Shape(GvNodeShape::Rectangle),
-            GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Bold,GvNodeStyleKind::Rounded]),
-            GraphvizNodeStyleItem::FontSize( 18 )];
-        // ***
-        legend_node_gv_options
     }
 
     fn get_final_legend_gvnode_style(

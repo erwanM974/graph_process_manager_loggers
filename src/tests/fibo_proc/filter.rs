@@ -18,9 +18,12 @@ limitations under the License.
 
 use graph_process_manager_core::process::filter::AbstractNodePreFilter;
 
-use crate::tests::fibo_proc::{conf::FiboConfig, context::{FiboContextAndParameterization, FiboPersistentState}, node::FiboNodeKind};
+use crate::tests::fibo_proc::conf::FiboConfig; 
+use crate::tests::fibo_proc::context::FiboContextAndParameterization;
+use crate::tests::fibo_proc::node::FiboNodeKind;
 
-use super::context::FiboFiltrationResult;
+use super::filtration::FiboFiltrationResult;
+use super::state::FiboPersistentState;
 
 
 

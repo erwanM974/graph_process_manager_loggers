@@ -14,15 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use graph_process_manager_core::process::config::AbstractProcessParameterization;
+use graph_process_manager_core::process::config::AbstractContextAndParameterization;
 
 
-pub struct TreeContext {}
 
-pub struct TreeParameterization {}
+pub struct TreeContextAndParameterization {}
 
-impl AbstractProcessParameterization for TreeParameterization {
-    fn get_param_as_strings(&self) -> Vec<String> {
-        vec!["process = binary tree".to_string()]
+
+impl AbstractContextAndParameterization for TreeContextAndParameterization {
+    fn get_process_description(&self) -> String {
+        "Tree".to_owned()
+    }
+    fn get_parameters_description(&self) -> Vec<String> {
+        vec![]
     }
 }

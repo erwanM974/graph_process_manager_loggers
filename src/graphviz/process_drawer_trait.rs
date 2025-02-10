@@ -16,17 +16,17 @@ limitations under the License.
 
 
 use graph_process_manager_core::process::filter::GenericFiltersManager;
-use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
+use graph_process_manager_core::queue::priorities::{AbstractPriorities, GenericProcessPriorities};
 use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::colors::GraphvizColor;
 
-use graph_process_manager_core::process::config::AbstractProcessConfiguration;
+use graph_process_manager_core::process::config::{AbstractContextAndParameterization, AbstractProcessConfiguration};
 use graphviz_dot_builder::item::item::GraphVizGraphItem;
-use graphviz_dot_builder::item::node::style::GraphvizNodeStyle;
+use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape, GvNodeStyleKind};
 
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
 
-pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration> {
+pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration + 'static> {
 
     /**
      Returns the temporary folder on which to store temporary files.
@@ -43,7 +43,47 @@ pub trait GraphVizProcessDrawer<Conf : AbstractProcessConfiguration> {
         priorities: &GenericProcessPriorities<Conf::Priorities>,
         filters_manager : &GenericFiltersManager<Conf>,
         use_memoization : bool
-    ) -> GraphvizNodeStyle;
+    ) -> GraphvizNodeStyle {
+
+        let mut label_lines : Vec<String> = Vec::new();
+        label_lines.push(context_and_param.get_process_description().to_owned());
+        // ***
+        for param_dsc in context_and_param.get_parameters_description() {
+            label_lines.push( format!(" {}", param_dsc) );
+        }
+        // ***
+        label_lines.push( format!(" strategy={};", strategy) );
+        {
+            label_lines.push( " priorities=[".to_string() );
+            label_lines.push( format!("            randomize = {},", priorities.randomize) );
+            for prio_dsc_line in priorities.domain_specific.get_description() {
+                label_lines.push( format!("            {},", prio_dsc_line) );
+            }
+            label_lines.push( " ];".to_string() );
+        }
+        label_lines.push( format!(" memoize={}:", use_memoization) );
+        {
+            label_lines.push( " filters=[".to_string() );
+            for filter in filters_manager.get_step_filters() {
+                label_lines.push( format!("            {},", filter.get_filter_description()) );
+            }
+            for filter in filters_manager.get_node_pre_filters() {
+                label_lines.push( format!("            {},", filter.get_filter_description()) );
+            }
+            for filter in filters_manager.get_node_post_filters() {
+                label_lines.push( format!("            {},", filter.get_filter_description()) );
+            }
+            label_lines.push( " ];".to_string() );
+        }
+        // ***
+        let legend_node_gv_options : GraphvizNodeStyle = vec![
+            GraphvizNodeStyleItem::Label( label_lines.join(r"\l") + r"\l" ),
+            GraphvizNodeStyleItem::Shape(GvNodeShape::Rectangle),
+            GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Bold,GvNodeStyleKind::Rounded]),
+            GraphvizNodeStyleItem::FontSize( 18 )];
+        // ***
+        legend_node_gv_options
+    }
 
     /** 
      * Returns a legend node in which to describe the end result of the algorithm.

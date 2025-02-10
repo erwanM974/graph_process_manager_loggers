@@ -18,31 +18,29 @@ limitations under the License.
 
 
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
-use crate::tests::tree_proc::context::{TreeContext, TreeParameterization};
-use crate::tests::tree_proc::filter::elim::TreeFilterEliminationKind;
-use crate::tests::tree_proc::filter::filter::TreeFilterCriterion;
 use crate::tests::tree_proc::handler::TreeProcessHandler;
 use crate::tests::tree_proc::node::TreeNodeKind;
 use crate::tests::tree_proc::priorities::TreePriorities;
 use crate::tests::tree_proc::step::TreeStepKind;
-use crate::tests::tree_proc::verdict::global::TreeGlobalVerdict;
-use crate::tests::tree_proc::verdict::local::TreeLocalVerdict;
+
+use super::context::TreeContextAndParameterization;
+use super::filtration::TreeFiltrationResult;
+use super::state::TreePersistentState;
 
 pub struct TreeConfig {}
 
-pub struct TreeStaticProof {}
+
 
 impl AbstractProcessConfiguration for TreeConfig {
-    type Context = TreeContext;
-    type Parameterization = TreeParameterization;
-    type NodeKind = TreeNodeKind;
-    type StepKind = TreeStepKind;
+    // ***
+    type ContextAndParameterization = TreeContextAndParameterization;
+    type AlgorithmOperationHandler = TreeProcessHandler;
+    // ***
+    type DomainSpecificNode = TreeNodeKind;
+    type DomainSpecificStep = TreeStepKind;
     type Priorities = TreePriorities;
-    type FilterCriterion = TreeFilterCriterion;
-    type FilterEliminationKind = TreeFilterEliminationKind;
-    type LocalVerdict = TreeLocalVerdict;
-    type StaticLocalVerdictAnalysisProof = TreeStaticProof;
-    type GlobalVerdict = TreeGlobalVerdict;
-    type ProcessHandler = TreeProcessHandler;
+    // ***
+    type MutablePersistentState = TreePersistentState;
+    // ***
+    type FiltrationResult = TreeFiltrationResult;
 }
-
