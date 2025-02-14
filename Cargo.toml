@@ -1,6 +1,6 @@
 [package]
 name = "graph_process_manager_loggers"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Erwan Mahe"]
 edition = "2021"
 
@@ -15,11 +15,11 @@ keywords = ["graph", "tree", "process", "traversal", "heuristics"]
 
 
 [dependencies]
-maplit = "1.0.2"                                # for !hashset macro etc
-graph_process_manager_core = {git = "https://github.com/erwanM974/graph_process_manager_core"}
-graphviz_dot_builder = "0.1.5"
-autour_core = "0.1.12"
-itertools = "0.14.0"
+maplit                     = "1.0.2"   # for !hashset macro etc
+graph_process_manager_core = "0.2.1"   
+graphviz_dot_builder       = "0.1.5"   # for graphviz logger
+autour_core                = "0.1.12"  # for nfait logger
+itertools                  = "0.14.0"
 
 [dev-dependencies]
 ab_glyph           = "0.2.23"

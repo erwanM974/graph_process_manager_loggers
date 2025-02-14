@@ -19,7 +19,6 @@ limitations under the License.
 use graphviz_dot_builder::colors::GraphvizColor;
 use graphviz_dot_builder::item::item::GraphVizGraphItem;
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeStyleItem, GvNodeShape, GvNodeStyleKind};
-use crate::graphviz::process_drawer_trait::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizLoggerNodeFormat;
 use crate::tests::fibo_proc::conf::FiboConfig;
 use crate::tests::fibo_proc::context::FiboContextAndParameterization;

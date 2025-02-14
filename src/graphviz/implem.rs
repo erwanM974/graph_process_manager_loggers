@@ -39,6 +39,9 @@ use crate::graphviz::logger::GenericGraphVizLogger;
 
 use crate::graphviz::util::*;
 
+use super::drawers::all_the_rest_drawer::{get_filtration_result_as_gvnode_style_and_edge_color, get_step_gvnode_style_and_edge_color};
+use super::drawers::node_drawer::*;
+
 
 impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> for GenericGraphVizLogger<Conf> {
 
@@ -56,24 +59,22 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
         use_memoization : bool,
     ) {
         // empties temp directory if exists
-        let _ = fs::remove_dir_all(self.drawer.get_temp_folder());
+        let _ = fs::remove_dir_all(&self.configuration.temp_folder);
         // creates temp directory if not exist
-        let _ = fs::create_dir_all(self.drawer.get_temp_folder());
+        let _ = fs::create_dir_all(&self.configuration.temp_folder);
         // creates parent directory if not exist
-        if self.parent_folder != *"" {
-            let _ = fs::create_dir_all(&self.parent_folder);
+        if self.configuration.parent_folder != *"" {
+            let _ = fs::create_dir_all(&self.configuration.parent_folder);
         }
         // creates legend
-        if self.display_legend {
-            let legend_style = self.drawer.get_initial_legend_gvnode_style(
+        if self.configuration.display_legend {
+            let legend_node = self.legend_writer.get_legend_node(
                 context_and_param, 
                 strategy, 
                 priorities, 
                 filters_manager, 
                 use_memoization
             );
-            let legend_node = GraphVizNode::new("legend".to_string(),
-            legend_style);
             self.graph.add_node(legend_node);
         }
     }
@@ -87,10 +88,12 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
         new_node_id : u32,
         new_node : &Conf::DomainSpecificNode
     ) {
-        let as_gv_item = match self.drawer.get_node_format() {
+        let as_gv_item = match self.get_node_format() {
             GraphVizLoggerNodeFormat::AnchoredCluster => {
                 let cluster_name = get_node_id("", new_node_id);
-                let (cluster_style,mut cluster_nodes) = self.drawer.get_node_as_gvcluster_style(
+                let (cluster_style,mut cluster_nodes) = get_node_as_gvcluster_style(
+                    &self.node_drawers,
+                    &self.configuration.temp_folder,
                     context_and_param,
                     new_node,
                     &cluster_name
@@ -119,7 +122,9 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
             },
             GraphVizLoggerNodeFormat::SimpleNode => {
                 let node_name = get_node_id("",new_node_id);
-                let node_style = self.drawer.get_node_as_gvnode_style(
+                let node_style = get_node_as_gvnode_style(
+                    &self.node_drawers,
+                    &self.configuration.temp_folder,
                     context_and_param,
                     new_node,
                     &node_name
@@ -133,12 +138,12 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
             }
         };
 
-        if let Some(phase_id) = self.drawer.get_node_phase_id(context_and_param, new_node) {
+        if let Some(phase_id) = self.all_the_rest_drawer.get_node_phase_id(context_and_param, new_node) {
             if let std::collections::hash_map::Entry::Vacant(e) = self.process_phases_clusters.entry(
                 phase_id
             ) {
                 let phase_cluster_style = vec![
-                    GraphvizNodeStyleItem::FillColor(self.drawer.get_phase_color(phase_id))
+                    GraphvizNodeStyleItem::FillColor(self.all_the_rest_drawer.get_phase_color(phase_id))
                 ];
                 let new_phase_cluster = GraphVizCluster::new(
                     format!("phase{}",phase_id), 
@@ -172,7 +177,9 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
         _target_node : &Conf::DomainSpecificNode
     ) {
         let step_name = get_step_id("",origin_node_id,target_node_id);
-        let (step_style,edge_color) = self.drawer.get_step_gvnode_style_and_edge_color(
+        let (step_style,edge_color) = get_step_gvnode_style_and_edge_color(
+            &*self.all_the_rest_drawer,
+            &self.configuration.temp_folder,
             context_and_param,
             step,
             &step_name
@@ -182,7 +189,7 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
             step_style
         );
         // *** Transition To Step
-        let (tran_to_step,tran_to_new) = match self.drawer.get_node_format() {
+        let (tran_to_step,tran_to_new) = match self.get_node_format() {
             GraphVizLoggerNodeFormat::AnchoredCluster => {
                 let tran_gv_options = vec![
                     GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
@@ -261,7 +268,9 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
         filtration_result : &Conf::FiltrationResult
     ) {
         let filtration_node_name = get_filtration_id("", filtration_result_id);
-        let (filter_node_style, edge_color) = self.drawer.get_filtration_result_as_gvnode_style_and_edge_color(
+        let (filter_node_style, edge_color) = get_filtration_result_as_gvnode_style_and_edge_color(
+            &*self.all_the_rest_drawer,
+            &self.configuration.temp_folder,
             context_and_param,
             filtration_result, 
             &filtration_node_name
@@ -274,7 +283,7 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
                 GraphvizEdgeStyleItem::Head( GvArrowHeadStyle::Vee(GvArrowHeadSide::Both) ),
                 GraphvizEdgeStyleItem::Color( edge_color ) ];
             // ***
-            match self.drawer.get_node_format() {
+            match self.get_node_format() {
                 GraphVizLoggerNodeFormat::AnchoredCluster => {
                     GraphVizEdge::new(
                         get_anchor_id("",parent_node_id),
@@ -309,23 +318,18 @@ impl<Conf : AbstractProcessConfiguration + 'static> AbstractProcessLogger<Conf> 
     fn log_terminate_process(
         &mut self,
         context_and_param : &Conf::ContextAndParameterization,
-        global_state : &Conf::MutablePersistentState
+        final_global_state : &Conf::MutablePersistentState
     ) {
         for (_,cluster) in self.process_phases_clusters.drain() {
             self.graph.add_cluster(cluster);
         }
-        if self.display_legend {
-            let final_legend_style = self.drawer.get_final_legend_gvnode_style(
-                context_and_param, 
-                global_state
-            );
-            let verd_node = GraphVizNode::new("verdict".to_string(),final_legend_style);
-            self.graph.add_node(verd_node);
+        if self.configuration.display_legend {
+            self.graph.add_node(self.legend_writer.get_verdict_node(context_and_param, final_global_state));
         }
         if let Err(e) = self.graph.print_dot(
-            &[self.parent_folder.clone()],
-            &self.output_file_name,
-            &self.output_format
+            &[self.configuration.parent_folder.clone()],
+            &self.configuration.output_file_name,
+            &self.configuration.output_format
         ) {
             println!("error during logger termination : {:?} ", e);
         }

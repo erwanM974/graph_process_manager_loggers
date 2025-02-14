@@ -52,13 +52,9 @@ impl AbstractNodePreFilter<FiboConfig> for FiboFilter {
         }
         return None;
     }
-
-    fn get_filter_description(&self) -> String {
-        match self {
-            FiboFilter::MaxNum(num) => {
-                format!("max number = {}", num)
-            },
-        }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 
 }

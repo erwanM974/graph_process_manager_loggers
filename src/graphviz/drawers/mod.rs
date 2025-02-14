@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+pub mod all_the_rest_drawer;
+pub mod legend_writer;
 pub mod node_drawer;
-pub mod step_drawer;
-pub mod filtration_drawer;
-pub mod builtin_process_drawer_trait;
-mod implement;
-
 

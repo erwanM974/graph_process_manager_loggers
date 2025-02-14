@@ -29,8 +29,4 @@ impl AbstractPriorities<FiboStepKind> for FiboPriorities {
                             _step: &FiboStepKind) -> i32 {
         0
     }
-    
-    fn get_description(&self) -> Vec<String> {
-        vec![]
-    }
 }

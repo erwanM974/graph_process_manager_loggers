@@ -22,21 +22,54 @@ use graphviz_dot_builder::traits::GraphVizOutputFormat;
 use graphviz_dot_builder::graph::style::{GraphvizGraphStyleItem,GvGraphRankDir};
 use graphviz_dot_builder::item::cluster::GraphVizCluster;
 
-use crate::graphviz::process_drawer_trait::GraphVizProcessDrawer;
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
+
+use super::drawers::all_the_rest_drawer::CustomAllTheRestDrawerForGraphvizLogger;
+use super::drawers::legend_writer::ProcessLegendWriter;
+use super::drawers::node_drawer::CustomNodeDrawerForGraphvizLogger;
+use super::format::GraphVizLoggerNodeFormat;
+
+
+
+pub struct GenericGraphVizLoggerConfiguration {
+    pub output_format : GraphVizOutputFormat,
+    pub display_legend : bool,
+    // ***
+    pub temp_folder : String,
+    // ***
+    pub parent_folder : String,
+    pub output_file_name : String,
+}
+
+impl GenericGraphVizLoggerConfiguration {
+
+    pub fn new(
+        output_format : GraphVizOutputFormat,
+        display_legend : bool,
+        temp_folder : String,
+        parent_folder : String,
+        output_file_name : String
+    ) -> Self {
+        Self {
+            output_format,
+            display_legend,
+            temp_folder,
+            parent_folder,
+            output_file_name
+        }
+    }
+
+}
+
 
 
 pub struct GenericGraphVizLogger<Conf : AbstractProcessConfiguration> {
     // ***
-    /** the drawer **/
-    pub(crate) drawer : Box<dyn GraphVizProcessDrawer<Conf>>,
+    pub configuration : GenericGraphVizLoggerConfiguration,
     // ***
-    pub(crate) output_format : GraphVizOutputFormat,
-    // ***
-    pub(crate) display_legend : bool,
-    // ***
-    pub(crate) parent_folder : String,
-    pub(crate) output_file_name : String,
+    pub legend_writer : Box<dyn ProcessLegendWriter<Conf>>,
+    pub node_drawers : Vec<Box<dyn CustomNodeDrawerForGraphvizLogger<Conf>>>,
+    pub all_the_rest_drawer : Box<dyn CustomAllTheRestDrawerForGraphvizLogger<Conf>>,
     // ***
     /** the Graphviz graph that is being built **/
     pub graph : GraphVizDiGraph, 
@@ -46,18 +79,19 @@ pub struct GenericGraphVizLogger<Conf : AbstractProcessConfiguration> {
     A value is absent from that dictionary if the identifier does not yet exists.
     Or if we do not want to highlight phases.
     **/
-    pub(crate) nodes_id_to_process_phase_id : HashMap<u32,u32>,
+    pub(crate) nodes_id_to_process_phase_id : HashMap<u32,usize>,
     /** the drawer **/
-    pub(crate) process_phases_clusters : HashMap<u32,GraphVizCluster>
+    pub(crate) process_phases_clusters : HashMap<usize,GraphVizCluster>
 }
 
 impl<Conf : AbstractProcessConfiguration> GenericGraphVizLogger<Conf> {
-    pub fn new(drawer : Box<dyn GraphVizProcessDrawer<Conf>>,
-               output_format: GraphVizOutputFormat,
-               layout: GraphVizProcessLoggerLayout,
-               display_legend: bool,
-               parent_folder: String,
-               output_file_name: String) -> Self {
+    pub fn new(
+        configuration : GenericGraphVizLoggerConfiguration,
+        legend_writer : Box<dyn ProcessLegendWriter<Conf>>,
+        node_drawers : Vec<Box<dyn CustomNodeDrawerForGraphvizLogger<Conf>>>,
+        all_the_rest_drawer : Box<dyn CustomAllTheRestDrawerForGraphvizLogger<Conf>>,
+        layout: GraphVizProcessLoggerLayout
+    ) -> Self {
         // ***
         let rankdir : GvGraphRankDir = match layout {
             GraphVizProcessLoggerLayout::Horizontal => {
@@ -69,14 +103,29 @@ impl<Conf : AbstractProcessConfiguration> GenericGraphVizLogger<Conf> {
         };
         let style = vec![GraphvizGraphStyleItem::Rankdir(rankdir)];
         let graph = GraphVizDiGraph::new(style);
-        let nodes_id_to_process_phase_id : HashMap<u32,u32> = HashMap::new();
+        let nodes_id_to_process_phase_id : HashMap<u32,usize> = HashMap::new();
         let process_phases_clusters = HashMap::new();
         // ***
         Self {
-            drawer, output_format, display_legend, parent_folder, output_file_name,
-            graph, nodes_id_to_process_phase_id, process_phases_clusters
+            configuration,
+            legend_writer,
+            node_drawers,
+            all_the_rest_drawer,
+            graph, 
+            nodes_id_to_process_phase_id, 
+            process_phases_clusters
         }
     }
+
+
+    pub fn get_node_format(&self) -> GraphVizLoggerNodeFormat {
+        if self.node_drawers.len() <= 1 {
+            GraphVizLoggerNodeFormat::SimpleNode
+        } else {
+            GraphVizLoggerNodeFormat::AnchoredCluster
+        }
+    }
+
 }
 
 

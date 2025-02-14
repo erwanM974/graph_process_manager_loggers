@@ -14,21 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-use graph_process_manager_core::process::config::AbstractContextAndParameterization;
-
-
-
 
 
 pub struct FiboContextAndParameterization {}
-
-
-impl AbstractContextAndParameterization for FiboContextAndParameterization {
-    fn get_process_description(&self) -> String {
-        "Fibonacci".to_owned()
-    }
-    fn get_parameters_description(&self) -> Vec<String> {
-        vec![]
-    }
-}
 
