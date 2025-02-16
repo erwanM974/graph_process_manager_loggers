@@ -24,22 +24,59 @@ use graphviz_dot_builder::item::node::style::{GraphvizNodeStyle, GraphvizNodeSty
 
 
 
-/** 
- * Draw the custom item as a Graghviz node with:
- * - the following style :
- *   + a specific shape
- *   + a label
- *   + a fill color
- *   + a font size
- *   + a font name
- *   + a font color
- * - or:
- *   + as a rectangle
- *   + with "" (empty string) as label
- *   + containing an image
- * **/
+pub struct BuiltinGraphvizLoggerDefaultGvItemStyle {
+    pub shape : GvNodeShape,
+    pub label : String,
+    pub font_size : u32,
+    pub font_name : Option<&'static str>,
+    pub font_color : GraphvizColor,
+    pub border_color : GraphvizColor,
+    pub fill_color : GraphvizColor
+}
+
+impl BuiltinGraphvizLoggerDefaultGvItemStyle {
+
+    pub fn new(
+        shape : GvNodeShape,
+        label : String, 
+        font_size : u32, 
+        font_name : Option<&'static str>, 
+        font_color : GraphvizColor, 
+        border_color : GraphvizColor, 
+        fill_color :GraphvizColor 
+    ) -> Self {
+        Self {
+            shape, 
+            label, 
+            font_size, 
+            font_name, 
+            font_color, 
+            border_color, 
+            fill_color 
+        }
+    }
+
+    pub fn to_gv_style(self) -> GraphvizNodeStyle {
+        let mut style = vec![
+            GraphvizNodeStyleItem::Shape( self.shape ),
+            GraphvizNodeStyleItem::Label( self.label ),
+            GraphvizNodeStyleItem::FontSize( self.font_size ),
+            GraphvizNodeStyleItem::FontColor( self.font_color ),
+            GraphvizNodeStyleItem::Color( self.border_color ),
+            GraphvizNodeStyleItem::FillColor( self.fill_color ),
+            GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])
+        ];
+        if let Some(font_name) = self.font_name {
+            style.push(GraphvizNodeStyleItem::FontName( font_name.to_string() ))
+        }
+        style
+    }
+
+}
+
+
  pub enum BuiltinGraphvizLoggerItemStyle {
-    ShapeAndLabel(GvNodeShape,String,GraphvizColor,u32,&'static str,GraphvizColor),
+    Default(BuiltinGraphvizLoggerDefaultGvItemStyle),
     CustomImage
 }
 
@@ -61,22 +98,8 @@ impl BuiltinGraphvizLoggerItemStyle {
                     )
                 ]
             },
-            BuiltinGraphvizLoggerItemStyle::ShapeAndLabel(
-                shape, 
-                label,
-                fill_color,
-                font_size,
-                font_name,
-                font_color) => {
-                    vec![
-                        GraphvizNodeStyleItem::Shape( shape ),
-                        GraphvizNodeStyleItem::Label( label ),
-                        GraphvizNodeStyleItem::Color( fill_color ),
-                        GraphvizNodeStyleItem::FontSize( font_size ),
-                        GraphvizNodeStyleItem::FontName( font_name.to_string() ),
-                        GraphvizNodeStyleItem::FontColor( font_color ),
-                        GraphvizNodeStyleItem::Style(vec![GvNodeStyleKind::Filled])
-                    ]
+            BuiltinGraphvizLoggerItemStyle::Default(item_style) => {
+                item_style.to_gv_style()
             }
         }
 

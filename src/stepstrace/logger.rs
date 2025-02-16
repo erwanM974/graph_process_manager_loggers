@@ -63,7 +63,7 @@ impl<Conf: AbstractProcessConfiguration,
         };
         Self { printer,
             anti_duplication_memoizer,
-            trace_map : hashmap!{},
+            trace_map : HashMap::new(),
             prefix,
             file_extension,
             parent_folder,

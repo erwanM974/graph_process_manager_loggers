@@ -22,6 +22,7 @@ use autour_core::traits::letter::AutLetter;
 use autour_core::traits::repr::AbstractLanguagePrinter;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
+use maplit::{btreemap, hashmap, hashset};
 
 use crate::nfait::builder::NFAITProcessBuilder;
 

@@ -23,6 +23,7 @@ use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
 use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::traits::DotPrintable;
+use maplit::{hashmap, hashset};
 
 use crate::nfait::logger::{GenericNFAITLogger, NFAITBuilderPrinter};
 

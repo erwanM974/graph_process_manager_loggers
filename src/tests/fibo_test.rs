@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 
-use std::path::PathBuf;
 use autour_core::printers::p_chars::CharAsLetterPrinter;
 use graph_process_manager_core::process::filter::GenericFiltersManager;
 use graph_process_manager_core::process::manager::GenericProcessManager;
@@ -24,12 +23,11 @@ use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
 
 use crate::graphviz::format::GraphVizProcessLoggerLayout;
-use crate::graphviz::logger::GenericGraphVizLogger;
+use crate::graphviz::logger::{GenericGraphVizLogger, GenericGraphVizLoggerConfiguration};
 use crate::nfait::logger::GenericNFAITLogger;
 use crate::nodesprint::logger::GenericNodesPrintLogger;
 use crate::stepstrace::logger::GenericStepsTraceLogger;
 use crate::tests::fibo_proc::conf::FiboConfig;
-use crate::tests::fibo_proc::loggers::glog::drawer::FiboProcessDrawer;
 use crate::tests::fibo_proc::loggers::nlog::printer::FiboProcessNodePrinter;
 use crate::tests::fibo_proc::loggers::slog::object::FiboStepsTrace;
 use crate::tests::fibo_proc::loggers::slog::printer::FiboProcessStepPrinter;
@@ -38,41 +36,54 @@ use crate::tests::fibo_proc::priorities::FiboPriorities;
 
 use super::fibo_proc::context::FiboContextAndParameterization;
 use super::fibo_proc::filter::FiboFilter;
+use super::fibo_proc::loggers::glog::all_the_rest_drawer::FiboAllTheRestDrawer;
+use super::fibo_proc::loggers::glog::legend_writer::FiboLegendWriter;
+use super::fibo_proc::loggers::glog::node_drawer::FiboNodeDrawer;
 
 #[test]
 fn process_fibo() {
-    let fibo_buf : PathBuf = [".", "fibo"].iter().collect();
-    let temp_buf : PathBuf = [".", "fibo_temp"].iter().collect();
 
-    let output_name = "fibo".to_string();
-
-    let drawer = FiboProcessDrawer::new(temp_buf.into_os_string().into_string().unwrap());
-    let graphic_logger : GenericGraphVizLogger<FiboConfig> = GenericGraphVizLogger::new(
-        Box::new(drawer),
-        GraphVizOutputFormat::svg,
-        GraphVizProcessLoggerLayout::Vertical,
-        true,
-        fibo_buf.clone().into_os_string().into_string().unwrap(),
-        format!("proc_{}",output_name));
+    let graphviz_logger : GenericGraphVizLogger<FiboConfig> = {
+        let gv_conf = GenericGraphVizLoggerConfiguration::new(
+            GraphVizOutputFormat::svg, 
+            true, 
+            "fibo_temp".to_string(), 
+            "fibo".to_string(), 
+            "fibo_gv".to_string()
+        );
+        GenericGraphVizLogger::new(
+            gv_conf,
+            Box::new(FiboLegendWriter{}),
+            vec![Box::new(FiboNodeDrawer{})],
+            Box::new(FiboAllTheRestDrawer{}),
+            GraphVizProcessLoggerLayout::Vertical
+        )
+    };
 
     let node_printer = FiboProcessNodePrinter{};
-    let node_logger : GenericNodesPrintLogger<FiboConfig> = GenericNodesPrintLogger::new(Box::new(node_printer),
-                                                                                         "fib_number".to_string(),
-                                                                                         "txt".to_string(),
-                                                                                         fibo_buf.clone().into_os_string().into_string().unwrap());
+    let node_logger : GenericNodesPrintLogger<FiboConfig> = GenericNodesPrintLogger::new(
+        Box::new(node_printer),
+        "fib_number".to_string(),
+        "txt".to_string(),
+        "fibo".to_string()
+    );
 
     let steps_printer = FiboProcessStepPrinter{};
-    let steps_logger : GenericStepsTraceLogger<FiboConfig,FiboStepsTrace> = GenericStepsTraceLogger::new(Box::new(steps_printer),
-                                                                                                         true,
-                                                                                                         "fib_trace".to_string(),
-                                                                                                         "txt".to_string(),
-                                                                                                         fibo_buf.clone().into_os_string().into_string().unwrap());
+    let steps_logger : GenericStepsTraceLogger<FiboConfig,FiboStepsTrace> = GenericStepsTraceLogger::new(
+        Box::new(steps_printer),
+        true,
+        "fib_trace".to_string(),
+        "txt".to_string(),
+        "fibo".to_string()
+    );
 
     let nfait_printer = CharAsLetterPrinter{};
-    let nfait_logger : GenericNFAITLogger<FiboConfig,char,CharAsLetterPrinter> = GenericNFAITLogger::new(nfait_printer,
-                                                                                     "fib_nfait".to_string(),
-                                                                                     Some((true,GraphVizOutputFormat::svg)),
-                                                                                     fibo_buf.into_os_string().into_string().unwrap());
+    let nfait_logger : GenericNFAITLogger<FiboConfig,char,CharAsLetterPrinter> = GenericNFAITLogger::new(
+        nfait_printer,
+        "fib_nfait".to_string(),
+        Some((true,GraphVizOutputFormat::svg)),
+        "fibo".to_string()
+    );
 
     let init_node = FiboNodeKind::new(0,1);
 
@@ -88,7 +99,7 @@ fn process_fibo() {
         QueueSearchStrategy::DFS,
         priorities,
         filters_manager,
-        vec![Box::new(graphic_logger),
+        vec![Box::new(graphviz_logger),
             Box::new(node_logger),
             Box::new(steps_logger),
             Box::new(nfait_logger)],

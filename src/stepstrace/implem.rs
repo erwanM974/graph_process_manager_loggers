@@ -26,6 +26,7 @@ use graph_process_manager_core::process::logger::AbstractProcessLogger;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graph_process_manager_core::queue::priorities::GenericProcessPriorities;
 use graph_process_manager_core::queue::strategy::QueueSearchStrategy;
+use maplit::hashset;
 
 use crate::stepstrace::logger::GenericStepsTraceLogger;
 use crate::stepstrace::object::ObjectToBuildWhenTracingSteps;
@@ -60,7 +61,6 @@ impl<Conf : AbstractProcessConfiguration + 'static,
         new_node_id : u32,
         new_node : &Conf::DomainSpecificNode
     ) {
-        eprintln!("steps trace log new node with id {}", new_node_id);
         if new_node_id == 1 {
             // initializes the objects storage in 'self.trace_map'
             // with the initial object
@@ -83,7 +83,6 @@ impl<Conf : AbstractProcessConfiguration + 'static,
         target_node_id : u32,
         target_node : &Conf::DomainSpecificNode
     ) {
-        eprintln!("steps trace log new step from id {} to id {}", origin_node_id, target_node_id);
 
         // collect objects already build on the origin node
         let parent_node_objects = self.trace_map.get(&origin_node_id).unwrap();

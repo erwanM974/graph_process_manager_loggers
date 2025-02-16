@@ -15,17 +15,11 @@ limitations under the License.
 */
 
 
-
-#[macro_use]
-extern crate maplit;
-
-
 pub mod graphviz;
 pub mod stepstrace;
 pub mod nodesprint;
 pub mod nfait;
 
-/* 
+
 #[cfg(test)]
 mod tests;
-*/
