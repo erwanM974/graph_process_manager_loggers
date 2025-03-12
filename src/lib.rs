@@ -15,9 +15,14 @@ limitations under the License.
 */
 
 
-pub mod graphviz;
 pub mod stepstrace;
 pub mod nodesprint;
+
+
+#[cfg(feature = "graphviz")]
+pub mod graphviz;
+
+#[cfg(feature = "nfait")]
 pub mod nfait;
 
 

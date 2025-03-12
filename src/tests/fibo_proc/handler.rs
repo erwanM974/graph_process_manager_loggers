@@ -23,6 +23,7 @@ use crate::tests::fibo_proc::node::FiboNodeKind;
 use crate::tests::fibo_proc::step::FiboStepKind;
 
 use super::context::FiboContextAndParameterization;
+use super::state::FiboPersistentState;
 
 
 pub struct FiboProcessHandler {}
@@ -31,6 +32,7 @@ impl AbstractAlgorithmOperationHandler<FiboConfig> for FiboProcessHandler {
 
     fn process_new_step(
         _context_and_param : &FiboContextAndParameterization,
+        _global_state : &mut FiboPersistentState,
         parent_node : &FiboNodeKind,
         step_to_process : &FiboStepKind
     ) -> FiboNodeKind {
@@ -45,6 +47,7 @@ impl AbstractAlgorithmOperationHandler<FiboConfig> for FiboProcessHandler {
 
     fn collect_next_steps(
         _context_and_param : &FiboContextAndParameterization,
+        _global_state : &FiboPersistentState,
         _parent_node : &FiboNodeKind
     ) -> Vec<FiboStepKind> {
         vec![FiboStepKind::Next]
