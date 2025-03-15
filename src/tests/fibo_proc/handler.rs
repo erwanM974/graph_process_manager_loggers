@@ -34,7 +34,7 @@ impl AbstractAlgorithmOperationHandler<FiboConfig> for FiboProcessHandler {
         _context_and_param : &FiboContextAndParameterization,
         _global_state : &mut FiboPersistentState,
         parent_node : &FiboNodeKind,
-        step_to_process : &FiboStepKind
+        step_to_process : &mut FiboStepKind
     ) -> FiboNodeKind {
         match &step_to_process {
             FiboStepKind::Next => {
@@ -47,7 +47,7 @@ impl AbstractAlgorithmOperationHandler<FiboConfig> for FiboProcessHandler {
 
     fn collect_next_steps(
         _context_and_param : &FiboContextAndParameterization,
-        _global_state : &FiboPersistentState,
+        _global_state : &mut FiboPersistentState,
         _parent_node : &FiboNodeKind
     ) -> Vec<FiboStepKind> {
         vec![FiboStepKind::Next]

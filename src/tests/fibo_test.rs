@@ -103,8 +103,9 @@ fn process_fibo() {
             Box::new(node_logger),
             Box::new(steps_logger),
             Box::new(nfait_logger)],
-        false
+        false,
+        init_node
     );
 
-    manager.start_process(init_node);
+    manager.start_process();
 }

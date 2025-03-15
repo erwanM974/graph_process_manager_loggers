@@ -24,7 +24,8 @@ pub struct FiboPersistentState {}
 
 impl AbstractProcessMutablePersistentState<FiboConfig> for FiboPersistentState {
     fn get_initial_state(
-        _context_and_param : &FiboContextAndParameterization
+        _context_and_param : &FiboContextAndParameterization,
+        _initial_node : &FiboNodeKind
     ) -> Self {
         FiboPersistentState {}
     }
