@@ -22,7 +22,6 @@ use autour_core::traits::letter::AutLetter;
 use autour_core::traits::repr::AbstractLanguagePrinter;
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graphviz_dot_builder::traits::GraphVizOutputFormat;
-use maplit::{btreemap, hashmap, hashset};
 
 use crate::nfait::builder::NFAITProcessBuilder;
 
@@ -76,12 +75,13 @@ impl<Conf, Letter,BP> GenericNFAITLogger<Conf, Letter,BP> where
             name,
             draw,
             parent_folder,
-            explo_node_id_to_nfa_state_id_map: btreemap!{},
-            next_nfa_state_id:0,
-            alphabet: hashset!{},
-            finals: hashset!{},
-            transitions: hashmap!{},
-            epsilon_trans: hashmap!{} }
+            explo_node_id_to_nfa_state_id_map: BTreeMap::new(),
+            next_nfa_state_id: 0,
+            alphabet: HashSet::new(),
+            finals: HashSet::new(),
+            transitions: HashMap::new(),
+            epsilon_trans: HashMap::new(),
+        }
     }
 
     pub fn get_nfait(&self) -> AutNFAIT<Letter> {
@@ -91,19 +91,21 @@ impl<Conf, Letter,BP> GenericNFAITLogger<Conf, Letter,BP> where
             if let Some(outgoing) = self.transitions.get(&i) {
                 transitions.push(outgoing.clone());
             } else {
-                transitions.push(hashmap! {});
+                transitions.push(HashMap::new());
             }
             if let Some(outgoing) = self.epsilon_trans.get(&i) {
                 epsilon_trans.push(outgoing.clone());
             } else {
-                epsilon_trans.push(hashset! {});
+                epsilon_trans.push(HashSet::new());
             }
         }
-        AutNFAIT::from_raw(self.alphabet.clone(),
-                           hashset!{0},
-                           self.finals.clone(),
-                           transitions,
-                           epsilon_trans).unwrap()
+        AutNFAIT::from_raw(
+            self.alphabet.clone(),
+            HashSet::from([0]),
+            self.finals.clone(),
+            transitions,
+            epsilon_trans,
+        ).unwrap()
     }
 }
 

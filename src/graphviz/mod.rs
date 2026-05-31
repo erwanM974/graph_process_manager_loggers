@@ -20,5 +20,4 @@ pub mod item;
 pub mod logger;
 pub(crate) mod util;
 
-pub mod drawers; 
-
+pub mod drawers;

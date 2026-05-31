@@ -15,6 +15,8 @@ limitations under the License.
 */
 
 
+pub mod logger;
+
 pub mod stepstrace;
 pub mod nodesprint;
 
@@ -26,5 +28,3 @@ pub mod graphviz;
 pub mod nfait;
 
 
-#[cfg(test)]
-mod tests;
