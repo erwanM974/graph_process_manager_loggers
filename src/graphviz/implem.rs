@@ -23,7 +23,7 @@ use graphviz_dot_builder::item::node::node::GraphVizNode;
 use graphviz_dot_builder::item::node::style::{GraphvizNodeStyleItem, GvNodeStyleKind};
 use graphviz_dot_builder::item::item::GraphVizGraphItem;
 use graphviz_dot_builder::item::cluster::GraphVizCluster;
-use graphviz_dot_builder::traits::DotPrintable;
+use graphviz_dot_builder::traits::{DotBuildable, DotPrintable};
 
 use graph_process_manager_core::process::config::AbstractProcessConfiguration;
 use graph_process_manager_core::process::manager::GenericProcessManager;
